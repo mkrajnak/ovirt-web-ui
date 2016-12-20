@@ -22,8 +22,8 @@ import {
   removeMissingVms,
 } from 'ovirt-ui-components'
 
-// import store from './store'
-import { persistState, getSingleVm } from './actions'
+import store from './store'
+import { persistState, getSingleVm, addTemplates, getAllTemplates, getAllClusters, addClusters } from './actions'
 import Api from './ovirtapi'
 import { persistStateToLocalStorage } from './storage'
 import Selectors from './selectors'
@@ -81,6 +81,8 @@ function* login (action) {
 
     yield put(loginSuccessful({ token, username }))
     yield put(getAllVms({ shallowFetch: false }))
+    yield put(getAllClusters()) // no shallow
+    yield put(getAllTemplates({ shallowFetch: false }))
   } else {
     yield put(loginFailed({
       errorCode: result['error_code'] ? result['error_code'] : 'no_access',
@@ -295,12 +297,40 @@ function* schedulerPerMinute (action) {
   }
 }
 
+function* createNewVm (action) {
+  yield callExternalAction('addNewVm', Api.addNewVm, action)
+  yield put(getAllVms({ shallowFetch: false }))
+}
+
+function* fetchAllTemplates (action) {
+  const templates = yield callExternalAction('getAllTemplates', Api.getAllTemplates, action)
+
+  if (templates && templates['template']) {
+    const templatesInternal = templates.template.map(template => Api.templateToInternal({ template }))
+    yield put(addTemplates({ templates: templatesInternal }))
+  }
+}
+
+function* fetchAllClusters (action) {
+  const clusters = yield callExternalAction('getAllCluster', Api.getAllClusters, action)
+
+  if (clusters && clusters['cluster']) {
+    const clustersInternal = clusters.cluster.map(cluster => Api.clusterToInternal({ cluster }))
+    console.log(clustersInternal)
+    yield put(addClusters({ clusters: clustersInternal }))
+  }
+}
+
 export function *rootSaga () {
+  console.log('VMS')
   yield [
     takeEvery('LOGIN', login),
     // takeEvery('LOGIN_SUCCESSFUL', onLoginSuccessful),
     takeEvery('LOGOUT', logout),
     takeLatest('GET_ALL_VMS', fetchAllVms),
+    takeLatest('ADD_NEW_VM', createNewVm),
+    takeLatest('GET_ALL_TEMPLATES', fetchAllTemplates),
+    takeLatest('GET_ALL_CLUSTERS', fetchAllClusters),
     takeLatest('PERSIST_STATE', persistStateSaga),
 
     takeEvery('SHUTDOWN_VM', shutdownVm),

@@ -8,6 +8,10 @@ import {
   VisibilityReducer as visibility,
 } from 'ovirt-ui-components'
 
+import templates from './templateReducer'
+import clusters from './clustersReducer'
+import addVmVisibility from './addVmVisibility'
+
 function router (redirectUrl = '/', action) {
   switch (action.type) {
     case 'SET_REDIRECT_URL':
@@ -24,4 +28,7 @@ export default combineReducers({
   icons,
   visibility,
   router,
+  templates,
+  clusters,
+  addVmVisibility,
 })

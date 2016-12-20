@@ -46,6 +46,23 @@ OvirtApi = {
         return Promise.reject(data)
       })
   },
+  _httpPostJSON ({ url, input }) {
+    console.log('POST JSON')
+    console.log(input)
+    return $.ajax(url, {
+      type: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OvirtApi._getLoginToken()}`,
+        'Filter': 'true',
+      },
+      data: input,
+    }).then(data => Promise.resolve(data))
+      .catch(data => {
+        return Promise.reject(data)
+      })
+  },
   // ----
   /**
    * @param vm - Single entry from oVirt REST /api/vms
@@ -141,6 +158,22 @@ OvirtApi = {
       format: disk['format'],
     }
   },
+
+  templateToInternal ({ template }) {
+    return {
+      id: template.id,
+      name: template.name,
+      description: template.description,
+    }
+  },
+
+  clusterToInternal ({ cluster }) {
+    return {
+      id: cluster.id,
+      name: cluster.name,
+    }
+  },
+
   iconToInternal ({ icon }) {
     return {
       id: icon.id,
@@ -183,6 +216,21 @@ OvirtApi = {
     OvirtApi._assertLogin({ methodName: 'getAllVms' })
     const url = `${AppConfiguration.applicationContext}/api/vms`
     return OvirtApi._httpGet({ url })
+  },
+  getAllTemplates () {
+    OvirtApi._assertLogin({ methodName: 'getAllTemplates' })
+    const url = '/api/templates'
+    return OvirtApi._httpGet({ url })
+  },
+  getAllClusters () {
+    OvirtApi._assertLogin({ methodName: 'getAllClusters' })
+    const url = '/api/clusters'
+    return OvirtApi._httpGet({ url })
+  },
+  addNewVm ({ vm }) {
+    console.log('API')
+    OvirtApi._assertLogin({ methodName: 'addNewVm' })
+    return OvirtApi._httpPostJSON({ url: `/api/vms`, input: JSON.stringify(vm) })
   },
   shutdown ({ vmId }) {
     OvirtApi._assertLogin({ methodName: 'shutdown' })
