@@ -160,10 +160,19 @@ OvirtApi = {
   },
 
   templateToInternal ({ template }) {
+    if (template.cluster) {
+      return {
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        cluster: template.cluster.id,
+      }
+    }
     return {
       id: template.id,
       name: template.name,
       description: template.description,
+      cluster: '0',
     }
   },
 

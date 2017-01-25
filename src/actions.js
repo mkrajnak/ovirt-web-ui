@@ -32,6 +32,15 @@ export function addClusters ({ clusters }) {
   }
 }
 
+export function updateCluster (cluster) {
+  return {
+    type: 'UPDATE_CLUSTER',
+    payload: {
+      cluster,
+    },
+  }
+}
+
 export function addTemplates ({ templates }) {
   return {
     type: 'ADD_TEMPLATES',

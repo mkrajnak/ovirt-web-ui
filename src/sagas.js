@@ -23,7 +23,7 @@ import {
 } from 'ovirt-ui-components'
 
 import store from './store'
-import { persistState, getSingleVm, addTemplates, getAllTemplates, getAllClusters, addClusters } from './actions'
+import { persistState, getSingleVm, addTemplates, getAllTemplates, getAllClusters, addClusters, updateCluster } from './actions'
 import Api from './ovirtapi'
 import { persistStateToLocalStorage } from './storage'
 import Selectors from './selectors'
@@ -316,8 +316,10 @@ function* fetchAllClusters (action) {
 
   if (clusters && clusters['cluster']) {
     const clustersInternal = clusters.cluster.map(cluster => Api.clusterToInternal({ cluster }))
-    console.log(clustersInternal)
     yield put(addClusters({ clusters: clustersInternal }))
+    console.log('PENIS')
+    console.log(clustersInternal[0])
+    yield put(updateCluster(clustersInternal[0]))
   }
 }
 

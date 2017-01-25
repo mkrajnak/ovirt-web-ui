@@ -11,6 +11,7 @@ import {
 import templates from './templateReducer'
 import clusters from './clustersReducer'
 import addVmVisibility from './addVmVisibility'
+import addVm from './addVMReducer'
 
 function router (redirectUrl = '/', action) {
   switch (action.type) {
@@ -31,4 +32,5 @@ export default combineReducers({
   templates,
   clusters,
   addVmVisibility,
+  addVm,
 })
