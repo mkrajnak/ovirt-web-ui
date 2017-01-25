@@ -41,6 +41,13 @@ export function updateCluster (cluster) {
   }
 }
 
+export function getAllClusters () {
+  return {
+    type: 'GET_ALL_CLUSTERS',
+    payload: {},
+  }
+}
+
 export function addTemplates ({ templates }) {
   return {
     type: 'ADD_TEMPLATES',
@@ -59,10 +66,13 @@ export function getAllTemplates ({ shallowFetch = false }) {
   }
 }
 
-export function getAllClusters () {
+export function filterTemplates (cluster, templates) {
   return {
-    type: 'GET_ALL_CLUSTERS',
-    payload: {},
+    type: 'FILTER_TEMPLATES',
+    payload: {
+      cluster,
+      templates,
+    },
   }
 }
 

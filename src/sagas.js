@@ -317,8 +317,6 @@ function* fetchAllClusters (action) {
   if (clusters && clusters['cluster']) {
     const clustersInternal = clusters.cluster.map(cluster => Api.clusterToInternal({ cluster }))
     yield put(addClusters({ clusters: clustersInternal }))
-    console.log('PENIS')
-    console.log(clustersInternal[0])
     yield put(updateCluster(clustersInternal[0]))
   }
 }
@@ -331,8 +329,8 @@ export function *rootSaga () {
     takeEvery('LOGOUT', logout),
     takeLatest('GET_ALL_VMS', fetchAllVms),
     takeLatest('ADD_NEW_VM', createNewVm),
-    takeLatest('GET_ALL_TEMPLATES', fetchAllTemplates),
     takeLatest('GET_ALL_CLUSTERS', fetchAllClusters),
+    takeLatest('GET_ALL_TEMPLATES', fetchAllTemplates),
     takeLatest('PERSIST_STATE', persistStateSaga),
 
     takeEvery('SHUTDOWN_VM', shutdownVm),
