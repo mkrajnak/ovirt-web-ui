@@ -22,7 +22,7 @@ import {
   removeMissingVms,
 } from 'ovirt-ui-components'
 
-import store from './store'
+// import store from './store'
 import { persistState, getSingleVm, addTemplates, getAllTemplates, getAllClusters, addClusters, updateCluster } from './actions'
 import Api from './ovirtapi'
 import { persistStateToLocalStorage } from './storage'
@@ -83,6 +83,7 @@ function* login (action) {
     yield put(getAllVms({ shallowFetch: false }))
     yield put(getAllClusters()) // no shallow
     yield put(getAllTemplates({ shallowFetch: false }))
+    yield put
   } else {
     yield put(loginFailed({
       errorCode: result['error_code'] ? result['error_code'] : 'no_access',

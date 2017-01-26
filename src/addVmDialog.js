@@ -16,6 +16,7 @@ class AddVmDialog extends React.Component {
   }
 
   componentDidUpdate () {
+    // without this template combobox its not rerendering
     $(this.template).selectpicker('refresh')
   }
 
@@ -43,63 +44,55 @@ class AddVmDialog extends React.Component {
   }
 
   changeCluster () {
-    let clusterId = ''
-    this.props.clusters.get('clusters').toList().map(cluster =>
-      cluster.get('name') === this.cluster.value ? clusterId = cluster.get('id') : false)
+    let clusterId = this.props.clusters.get('clusters').toList().find(cluster =>
+      cluster.get('name') === this.cluster.value ? cluster.get('id') : false)
     let cluster = {
-      'id': clusterId,
+      'id': clusterId.get('id'),
       'name': this.cluster.value,
     }
     this.props.changeCluster(cluster)
     this.props.updateTemplates(cluster, this.props.allTemplates.get('templates'))
   }
 
-  log () {
-    console.log('LLL')
-    console.log(this.props.templates.get('templates').map(template =>
-      <option value={template.get('name')} key={template.get('id')}>{template.get('name')}</option>))
-  }
-
   render () {
     return (
-      <div>
-        <DetailContainer>
-          <hr />
-          <form className='form-horizontal'>
-            <div className='form-group'>
-              <label className='col-sm-2 control-label'>Clusters</label>
-              <div className='col-sm-10'>
-                <select className='selectpicker' ref={(input) => { this.cluster = input }}
-                  onChange={this.changeCluster}>
-                  {this.props.clusters.get('clusters').toList().map(cluster =>
-                    <option value={cluster.get('name')} key={cluster.get('id')}>{cluster.get('name')}</option>)}
-                </select>
-              </div>
+      <DetailContainer>
+        <h1>Create a new vm</h1>
+        <hr />
+        <form className='form-horizontal'>
+          <div className='form-group'>
+            <label className='col-sm-2 control-label'>Clusters</label>
+            <div className='col-sm-10'>
+              <select className='selectpicker' ref={(input) => { this.cluster = input }}
+                onChange={this.changeCluster}>
+                {this.props.clusters.get('clusters').toList().map(cluster =>
+                  <option value={cluster.get('name')} key={cluster.get('id')}>{cluster.get('name')}</option>)}
+              </select>
             </div>
-            <div className='form-group'>
-              <label className='col-sm-2 control-label'>Templates</label>
-              <div className='col-sm-10'>
-                <select className='selectpicker' ref={(input) => { this.template = input }}>
-                  {this.props.templates.get('templates').toList().map(template =>
-                    <option value={template.get('name')} key={template.get('id')}>{template.get('name')}</option>)}
-                </select>
-              </div>
+          </div>
+          <div className='form-group'>
+            <label className='col-sm-2 control-label'>Templates</label>
+            <div className='col-sm-10'>
+              <select className='selectpicker' ref={(input) => { this.template = input }}>
+                {this.props.templates.get('templates').toList().map(template =>
+                  <option value={template.get('name')} key={template.get('id')}>{template.get('name')}</option>)}
+              </select>
             </div>
-            <div className='form-group'>
-              <label className='col-sm-2 control-label' htmlFor='vmName' >Name</label>
-              <div className='col-sm-10'>
-                <input type='text' id='vmName' className='form-control' ref={(input) => { this.name = input }} placeholder='VM Name' required />
-              </div>
+          </div>
+          <div className='form-group'>
+            <label className='col-sm-2 control-label' htmlFor='vmName' >Name</label>
+            <div className='col-sm-10'>
+              <input type='text' id='vmName' className='form-control' ref={(input) => { this.name = input }} placeholder='VM Name' required />
             </div>
-            <div className='form-group'>
-              <div className='col-sm-offset-2 col-sm-10'>
-                <button className='btn btn-default' type='submit' onClick={this.closeDialog}>Close</button>
-                <button className='btn btn-primary' type='submit' onClick={this.createNewVm}>Submit</button>
-              </div>
+          </div>
+          <div className='form-group'>
+            <div className='col-sm-offset-2 col-sm-10'>
+              <button className='btn btn-default' type='submit' onClick={this.closeDialog}>Close</button>
+              <button className='btn btn-primary' type='submit' onClick={this.createNewVm}>Submit</button>
             </div>
-          </form>
-        </DetailContainer>
-      </div>
+          </div>
+        </form>
+      </DetailContainer>
     )
   }
 }
