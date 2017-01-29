@@ -166,6 +166,9 @@ OvirtApi = {
         name: template.name,
         description: template.description,
         cluster: template.cluster.id,
+        memmory: template.memory,
+        cpu: template.cpu.topology.sockets,
+        os: template.os.type,
       }
     }
     return {
@@ -173,6 +176,9 @@ OvirtApi = {
       name: template.name,
       description: template.description,
       cluster: '0',
+      memmory: template.memory,
+      cpu: template.cpu.topology.sockets,
+      os: template.os.type,
     }
   },
 
@@ -180,6 +186,14 @@ OvirtApi = {
     return {
       id: cluster.id,
       name: cluster.name,
+    }
+  },
+
+  OSToInternal ({ os }) {
+    return {
+      id: os.id,
+      name: os.name,
+      description: os.description,
     }
   },
 
@@ -234,6 +248,11 @@ OvirtApi = {
   getAllClusters () {
     OvirtApi._assertLogin({ methodName: 'getAllClusters' })
     const url = '/api/clusters'
+    return OvirtApi._httpGet({ url })
+  },
+  getAllOperatingSystems () {
+    OvirtApi._assertLogin({ methodName: 'getAllOperatingSystems' })
+    const url = '/api/operatingsystems'
     return OvirtApi._httpGet({ url })
   },
   addNewVm ({ vm }) {

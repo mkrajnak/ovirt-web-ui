@@ -11,6 +11,7 @@ const Templates = ({ templates, ref }) => {
     </div>
   )
 }
+
 Templates.propTypes = {
   templates: PropTypes.object.isRequired,
   ref: PropTypes.func.isRequired,

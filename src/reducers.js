@@ -10,6 +10,7 @@ import {
 
 import templates from './templateReducer'
 import clusters from './clustersReducer'
+import operatingSystems from './addOSReducer'
 import addVmVisibility from './addVmVisibility'
 import addVm from './addVMReducer'
 
@@ -33,4 +34,5 @@ export default combineReducers({
   clusters,
   addVmVisibility,
   addVm,
+  operatingSystems,
 })

@@ -1,3 +1,19 @@
+export function getAllOperatingSystems () {
+  return {
+    type: 'GET_ALL_OS',
+    payload: {},
+  }
+}
+
+export function addAllOS ({ os }) {
+  return {
+    type: 'ADD_ALL_OS',
+    payload: {
+      os,
+    },
+  }
+}
+
 export function addNewVm ({ vm }) {
   return {
     type: 'ADD_NEW_VM',

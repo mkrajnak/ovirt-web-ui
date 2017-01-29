@@ -23,7 +23,17 @@ import {
 } from 'ovirt-ui-components'
 
 // import store from './store'
-import { persistState, getSingleVm, addTemplates, getAllTemplates, getAllClusters, addClusters, updateCluster } from './actions'
+import {
+  persistState,
+  getSingleVm,
+  getAllTemplates,
+  getAllClusters,
+  getAllOperatingSystems,
+  addClusters,
+  addTemplates,
+  addAllOS,
+  updateCluster,
+} from './actions'
 import Api from './ovirtapi'
 import { persistStateToLocalStorage } from './storage'
 import Selectors from './selectors'
@@ -82,8 +92,8 @@ function* login (action) {
     yield put(loginSuccessful({ token, username }))
     yield put(getAllVms({ shallowFetch: false }))
     yield put(getAllClusters()) // no shallow
+    yield put(getAllOperatingSystems())
     yield put(getAllTemplates({ shallowFetch: false }))
-    yield put
   } else {
     yield put(loginFailed({
       errorCode: result['error_code'] ? result['error_code'] : 'no_access',
@@ -313,12 +323,21 @@ function* fetchAllTemplates (action) {
 }
 
 function* fetchAllClusters (action) {
-  const clusters = yield callExternalAction('getAllCluster', Api.getAllClusters, action)
+  const clusters = yield callExternalAction('getAllClusters', Api.getAllClusters, action)
 
   if (clusters && clusters['cluster']) {
     const clustersInternal = clusters.cluster.map(cluster => Api.clusterToInternal({ cluster }))
     yield put(addClusters({ clusters: clustersInternal }))
     yield put(updateCluster(clustersInternal[0]))
+  }
+}
+
+function* fetchAllOS (action) {
+  const operatingSystems = yield callExternalAction('getAllOperatingSystems', Api.getAllOperatingSystems, action)
+
+  if (operatingSystems && operatingSystems['operating_system']) {
+    const operatingSystemsInternal = operatingSystems.operating_system.map(os => Api.OSToInternal({ os }))
+    yield put(addAllOS({ os: operatingSystemsInternal }))
   }
 }
 
@@ -332,6 +351,7 @@ export function *rootSaga () {
     takeLatest('ADD_NEW_VM', createNewVm),
     takeLatest('GET_ALL_CLUSTERS', fetchAllClusters),
     takeLatest('GET_ALL_TEMPLATES', fetchAllTemplates),
+    takeLatest('GET_ALL_OS', fetchAllOS),
     takeLatest('PERSIST_STATE', persistStateSaga),
 
     takeEvery('SHUTDOWN_VM', shutdownVm),

@@ -1,6 +1,6 @@
 import Immutable from 'immutable'
 
-function addNewclusters ({ state, payload: { clusters } }) {
+function addNewClusters ({ state, payload: { clusters } }) {
   const updates = {}
   clusters.forEach(cluster => {
     updates[cluster.id] = cluster
@@ -14,7 +14,7 @@ function clusters (state, action) {
 
   switch (action.type) {
     case 'ADD_CLUSTERS':
-      return addNewclusters({ state, payload: action.payload })
+      return addNewClusters({ state, payload: action.payload })
     default:
       return state
   }
