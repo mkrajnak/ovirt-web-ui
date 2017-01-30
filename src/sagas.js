@@ -33,7 +33,10 @@ import {
   addTemplates,
   addAllOS,
   updateCluster,
+  updateTemplate,
+  updateOperatingSystem,
 } from './actions'
+
 import Api from './ovirtapi'
 import { persistStateToLocalStorage } from './storage'
 import Selectors from './selectors'
@@ -319,6 +322,7 @@ function* fetchAllTemplates (action) {
   if (templates && templates['template']) {
     const templatesInternal = templates.template.map(template => Api.templateToInternal({ template }))
     yield put(addTemplates({ templates: templatesInternal }))
+    yield put(updateTemplate(templatesInternal[0]))
   }
 }
 
@@ -338,6 +342,7 @@ function* fetchAllOS (action) {
   if (operatingSystems && operatingSystems['operating_system']) {
     const operatingSystemsInternal = operatingSystems.operating_system.map(os => Api.OSToInternal({ os }))
     yield put(addAllOS({ os: operatingSystemsInternal }))
+    yield put(updateOperatingSystem(operatingSystemsInternal[0]))
   }
 }
 

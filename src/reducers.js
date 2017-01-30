@@ -10,7 +10,7 @@ import {
 
 import templates from './templateReducer'
 import clusters from './clustersReducer'
-import operatingSystems from './addOSReducer'
+import operatingSystems from './OSReducer'
 import addVmVisibility from './addVmVisibility'
 import addVm from './addVMReducer'
 

@@ -14,6 +14,15 @@ export function addAllOS ({ os }) {
   }
 }
 
+export function updateOperatingSystem (os) {
+  return {
+    type: 'UPDATE_OPERATING_SYSTEM',
+    payload: {
+      os,
+    },
+  }
+}
+
 export function addNewVm ({ vm }) {
   return {
     type: 'ADD_NEW_VM',
@@ -82,12 +91,11 @@ export function getAllTemplates ({ shallowFetch = false }) {
   }
 }
 
-export function filterTemplates (cluster, templates) {
+export function updateTemplate (template) {
   return {
-    type: 'FILTER_TEMPLATES',
+    type: 'UPDATE_TEMPLATE',
     payload: {
-      cluster,
-      templates,
+      template,
     },
   }
 }

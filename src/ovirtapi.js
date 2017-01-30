@@ -166,7 +166,7 @@ OvirtApi = {
         name: template.name,
         description: template.description,
         cluster: template.cluster.id,
-        memmory: template.memory,
+        memory: template.memory,
         cpu: template.cpu.topology.sockets,
         os: template.os.type,
       }
@@ -176,7 +176,7 @@ OvirtApi = {
       name: template.name,
       description: template.description,
       cluster: '0',
-      memmory: template.memory,
+      memory: template.memory,
       cpu: template.cpu.topology.sockets,
       os: template.os.type,
     }
