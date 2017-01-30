@@ -27,8 +27,6 @@ class AddVmDialog extends React.Component {
     $(this.template).selectpicker()
     $(this.cluster).selectpicker()
     $(this.os).selectpicker()
-    this.changeCluster()
-    this.changeTemplate()
   }
 
   createNewVm (e) {
@@ -92,7 +90,8 @@ class AddVmDialog extends React.Component {
               <select className='selectpicker' ref={(input) => { this.template = input }} onChange={this.changeTemplate}>
                 {this.props.templates.get('templates').toList().map(template =>
                     (template.get('cluster') === this.props.cluster.get('id') || template.get('cluster') === '0')
-                    ? <option value={template.get('name')} key={template.get('id')}>{template.get('name')}</option> : false)}
+                    ? <option value={template.get('name')} key={template.get('id')}>{template.get('name')}</option>
+                    : false)}
               </select>
             </div>
           </div>

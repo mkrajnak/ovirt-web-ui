@@ -342,7 +342,6 @@ function* fetchAllOS (action) {
   if (operatingSystems && operatingSystems['operating_system']) {
     const operatingSystemsInternal = operatingSystems.operating_system.map(os => Api.OSToInternal({ os }))
     yield put(addAllOS({ os: operatingSystemsInternal }))
-    yield put(updateOperatingSystem(operatingSystemsInternal[0]))
   }
 }
 
