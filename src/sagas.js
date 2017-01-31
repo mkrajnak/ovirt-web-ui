@@ -322,7 +322,8 @@ function* fetchAllTemplates (action) {
   if (templates && templates['template']) {
     const templatesInternal = templates.template.map(template => Api.templateToInternal({ template }))
     yield put(addTemplates({ templates: templatesInternal }))
-    yield put(updateTemplate(templatesInternal[0]))
+    const activeTemplate = templatesInternal.find(template => template.name === 'Blank')
+    yield put(updateTemplate(activeTemplate))
   }
 }
 
@@ -342,6 +343,8 @@ function* fetchAllOS (action) {
   if (operatingSystems && operatingSystems['operating_system']) {
     const operatingSystemsInternal = operatingSystems.operating_system.map(os => Api.OSToInternal({ os }))
     yield put(addAllOS({ os: operatingSystemsInternal }))
+    const activeOperatingSystem = operatingSystemsInternal.find(os => os.name === 'other')
+    yield put(updateOperatingSystem(activeOperatingSystem))
   }
 }
 

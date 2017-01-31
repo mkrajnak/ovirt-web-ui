@@ -2,7 +2,8 @@ import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
 import $ from 'jquery'
 
-// import SelectPicker from './selectPicker'
+import LabeledSelect from './labeledSelect'
+import LabeledTextField from './labeledTextField'
 import DetailContainer from './DetailContainer'
 import { addNewVm, updateCluster, updateTemplate, updateOperatingSystem, closeDetail } from './actions'
 
@@ -31,6 +32,8 @@ class AddVmDialog extends React.Component {
 
   createNewVm (e) {
     e.preventDefault()
+    console.log('HERE')
+    console.log(this.os.value)
     let vm = {
       'vm': {
         'name': this.name.value,
@@ -38,7 +41,7 @@ class AddVmDialog extends React.Component {
         'cluster': { 'name': this.cluster.value },
       },
     }
-    this.props.addVm(vm)
+    // this.props.addVm(vm)
   }
 
   closeDialog (e) {
@@ -74,58 +77,24 @@ class AddVmDialog extends React.Component {
         <h1>Create a new vm</h1>
         <hr />
         <form className='form-horizontal'>
-          <div className='form-group'>
-            <label className='col-sm-2 control-label'>Clusters</label>
-            <div className='col-sm-10'>
-              <select className='selectpicker' ref={(input) => { this.cluster = input }}
-                onChange={this.changeCluster}>
-                {this.props.clusters.get('clusters').toList().map(cluster =>
-                  <option value={cluster.get('name')} key={cluster.get('id')}>{cluster.get('name')}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className='form-group'>
-            <label className='col-sm-2 control-label'>Templates</label>
-            <div className='col-sm-10'>
-              <select className='selectpicker' ref={(input) => { this.template = input }} onChange={this.changeTemplate}>
-                {this.props.templates.get('templates').toList().map(template =>
-                    (template.get('cluster') === this.props.cluster.get('id') || template.get('cluster') === '0')
-                    ? <option value={template.get('name')} key={template.get('id')}>{template.get('name')}</option>
-                    : false)}
-              </select>
-            </div>
-          </div>
-          <div className='form-group'>
-            <label className='col-sm-2 control-label'>Operating System</label>
-            <div className='col-sm-10'>
-              <select className='selectpicker' ref={(input) => { this.os = input }} onChange={this.changeOperatingSystem}
-                value={this.props.template.get('os')} >
-                {this.props.operatingSystems.get('operatingSystems').toList().map(os =>
-                  <option value={os.get('name')} key={os.get('id')}>{os.get('description')}</option>)}
-              </select>
-            </div>
-          </div>
-          <div className='form-group'>
-            <label className='col-sm-2 control-label' htmlFor='vmMemory' >Memory</label>
-            <div className='col-sm-10'>
-              <input type='text' id='vmMemory' className='form-control' ref={(input) => { this.memory = input }}
-                placeholder='VM Memory' key={this.props.template.get('memory')} defaultValue={this.props.template.get('memory')} />
-            </div>
-          </div>
-          <div className='form-group'>
-            <label className='col-sm-2 control-label' htmlFor='vmCpu' >CPUs</label>
-            <div className='col-sm-10'>
-              <input type='text' id='vmCpu' className='form-control' ref={(input) => { this.cpus = input }}
-                placeholder='CPU' key={this.props.template.get('cpu')} defaultValue={this.props.template.get('cpu')} />
-            </div>
-          </div>
-          <div className='form-group'>
-            <label className='col-sm-2 control-label' htmlFor='vmName' >Name</label>
-            <div className='col-sm-10'>
-              <input type='text' id='vmName' className='form-control' ref={(input) => { this.name = input }}
-                placeholder='VM Name' required />
-            </div>
-          </div>
+          <LabeledSelect label='Cluster' val={(input) => { this.cluster = input }} onChange={this.changeCluster}
+            value={this.props.cluster.get('name')} data={this.props.clusters.get('clusters')} />
+
+          <LabeledSelect label='Template' val={(input) => { this.template = input }} onChange={this.changeTemplate}
+            value={this.props.template.get('name')}
+            data={this.props.templates.get('templates').toList().filter(template => (
+                template.get('cluster') === this.props.cluster.get('id') || template.get('cluster') === '0'))} />
+
+          <LabeledSelect label='Operating System' val={(input) => { this.os = input }} onChange={this.changeOperatingSystem}
+            value={this.props.os.get('name')} data={this.props.operatingSystems.get('operatingSystems')} renderDescription />
+
+          <LabeledTextField val={(input) => { this.memory = input }} id='vmMemory' label='Memory' placeholder='VM Memory'
+            key={this.props.template.get('memory')} defaultValue={this.props.template.get('memory')} />
+
+          <LabeledTextField val={(input) => { this.cpus = input }} id='vmCpu' label='CPU' placeholder='CPUs'
+            key={this.props.template.get('cpu')} defaultValue={this.props.template.get('cpu')} />
+
+          <LabeledTextField val={(input) => { this.name = input }} id='vmName' label='Name' placeholder='VM Name' />
           <div className='form-group'>
             <div className='col-sm-offset-2 col-sm-10'>
               <button className='btn btn-default' type='submit' onClick={this.closeDialog}>Close</button>
