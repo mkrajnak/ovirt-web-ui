@@ -32,8 +32,6 @@ class AddVmDialog extends React.Component {
 
   createNewVm (e) {
     e.preventDefault()
-    console.log('HERE')
-    console.log(this.os.value)
     let vm = {
       'vm': {
         'name': this.name.value,
@@ -41,7 +39,7 @@ class AddVmDialog extends React.Component {
         'cluster': { 'name': this.cluster.value },
       },
     }
-    // this.props.addVm(vm)
+    this.props.addVm(vm)
   }
 
   closeDialog (e) {
