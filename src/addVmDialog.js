@@ -75,8 +75,12 @@ class AddVmDialog extends React.Component {
         <h1>Create a new vm</h1>
         <hr />
         <form className='form-horizontal'>
-          <LabeledSelect label='Cluster' val={(input) => { this.cluster = input }} onChange={this.changeCluster}
-            value={this.props.cluster.get('name')} data={this.props.clusters.get('clusters')} />
+          <LabeledSelect
+            label='Cluster'
+            val={(input) => { this.cluster = input }}
+            onChange={this.changeCluster}
+            value={this.props.cluster.get('name')}
+            data={this.props.clusters.get('clusters')} />
 
           <LabeledSelect label='Template' val={(input) => { this.template = input }} onChange={this.changeTemplate}
             value={this.props.template.get('name')}
@@ -84,7 +88,8 @@ class AddVmDialog extends React.Component {
                 template.get('cluster') === this.props.cluster.get('id') || template.get('cluster') === '0'))} />
 
           <LabeledSelect label='Operating System' val={(input) => { this.os = input }} onChange={this.changeOperatingSystem}
-            value={this.props.os.get('name')} data={this.props.operatingSystems.get('operatingSystems')} renderDescription />
+            value={this.props.os.get('name')} data={this.props.operatingSystems.get('operatingSystems')}
+            renderer={(item) => item.get('description')} />
 
           <LabeledTextField val={(input) => { this.memory = input }} id='vmMemory' label='Memory' placeholder='VM Memory'
             key={this.props.template.get('memory')} defaultValue={this.props.template.get('memory')} />
