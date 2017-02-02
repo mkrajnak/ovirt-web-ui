@@ -26,7 +26,7 @@ const App = ({ vms, visibility, addVmVisibility }) => {
     <div>
       <VmsPageHeader title='oVirt User Portal' />
       <hr />
-      <AddVmButton className='btn btn-default' name='Add New VM' />
+      <AddVmButton name='Add New VM' />
       <div className='container-fluid navbar-top-offset'>
         <VmsList />
         {detailToRender}

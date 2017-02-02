@@ -6,7 +6,14 @@ import { toggleAddNewVm } from './actions'
 const AddVmButton = ({ name, toggleDialog }) => {
   return (
     <div>
-      <button onClick={toggleDialog}>{name}</button>
+      <button
+        width='100%'
+        type='button'
+        className='btn btn-primary'
+        onClick={toggleDialog}>
+        <span className='pfincon pficon pficon-add-circle-o' />
+        {name}
+      </button>
     </div>
   )
 }

@@ -5,7 +5,16 @@ import $ from 'jquery'
 import LabeledSelect from './labeledSelect'
 import LabeledTextField from './labeledTextField'
 import DetailContainer from './DetailContainer'
-import { addNewVm, updateCluster, updateTemplate, updateOperatingSystem, closeDetail } from './actions'
+import {
+  addNewVm,
+  updateCluster,
+  updateTemplate,
+  updateOperatingSystem,
+  closeDetail,
+  updateVmName,
+  updateVmMemory,
+  updateVmCpu,
+} from './actions'
 
 class AddVmDialog extends React.Component {
   constructor (props) {
@@ -15,6 +24,9 @@ class AddVmDialog extends React.Component {
     this.changeTemplate = this.changeTemplate.bind(this)
     this.changeOperatingSystem = this.changeOperatingSystem.bind(this)
     this.closeDialog = this.closeDialog.bind(this)
+    this.changeVmName = this.changeVmName.bind(this)
+    this.changeVmMemory = this.changeVmMemory.bind(this)
+    this.changeVmCpu = this.changeVmCpu.bind(this)
   }
 
   componentDidUpdate () {
@@ -61,12 +73,26 @@ class AddVmDialog extends React.Component {
     let os = this.props.operatingSystems.get('operatingSystems').toList().find(os =>
       os.get('name') === template.get('os'))
     this.props.changeOperatingSystem(os)
+    this.props.changeVmMemory(template.get('memory'))
+    this.props.changeVmCpu(template.get('cpu'))
   }
 
   changeOperatingSystem () {
     let os = this.props.operatingSystems.get('operatingSystems').toList().find(os =>
       os.get('name') === this.os.value)
     this.props.changeOperatingSystem(os)
+  }
+
+  changeVmName () {
+    this.props.changeVmName(this.name.value)
+  }
+
+  changeVmMemory () {
+    this.props.changeVmMemory(this.memory.value)
+  }
+
+  changeVmCpu () {
+    this.props.changeVmCpu(this.cpus.value)
   }
 
   render () {
@@ -92,12 +118,22 @@ class AddVmDialog extends React.Component {
             renderer={(item) => item.get('description')} />
 
           <LabeledTextField val={(input) => { this.memory = input }} id='vmMemory' label='Memory' placeholder='VM Memory'
-            key={this.props.template.get('memory')} defaultValue={this.props.template.get('memory')} />
+            key={this.props.memory} defaultValue={this.props.memory}
+            setValue={this.changeVmMemory} />
 
           <LabeledTextField val={(input) => { this.cpus = input }} id='vmCpu' label='CPU' placeholder='CPUs'
-            key={this.props.template.get('cpu')} defaultValue={this.props.template.get('cpu')} />
+            key={this.props.cpu} defaultValue={this.props.cpu}
+            setValue={this.changeVmCpu} />
 
-          <LabeledTextField val={(input) => { this.name = input }} id='vmName' label='Name' placeholder='VM Name' />
+          <LabeledTextField
+            val={(input) => { this.name = input }}
+            id='vmName'
+            label='Name'
+            placeholder='VM Name'
+            key={this.props.vmName}
+            defaultValue={this.props.vmName}
+            setValue={this.changeVmName} />
+
           <div className='form-group'>
             <div className='col-sm-offset-2 col-sm-10'>
               <button className='btn btn-default' type='submit' onClick={this.closeDialog}>Close</button>
@@ -117,11 +153,23 @@ AddVmDialog.propTypes = {
   template: PropTypes.object.isRequired,
   operatingSystems: PropTypes.object.isRequired,
   os: PropTypes.object.isRequired,
-  addVm: PropTypes.func.isRequired,
+  cpu: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
+  memory: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
+  vmName: PropTypes.string.isRequired,
   changeCluster: PropTypes.func.isRequired,
   changeTemplate: PropTypes.func.isRequired,
   changeOperatingSystem: PropTypes.func.isRequired,
+  changeVmName: PropTypes.func.isRequired,
+  changeVmMemory: PropTypes.func.isRequired,
+  changeVmCpu: PropTypes.func.isRequired,
   closeDialog: PropTypes.func.isRequired,
+  addVm: PropTypes.func.isRequired,
 }
 
 export default connect(
@@ -132,6 +180,9 @@ export default connect(
     cluster: state.addVm.get('cluster'),
     template: state.addVm.get('template'),
     os: state.addVm.get('os'),
+    memory: state.addVm.get('memory'),
+    cpu: state.addVm.get('cpu'),
+    vmName: state.addVm.get('name'),
   }),
   (dispatch) => ({
     addVm: (vm) =>
@@ -142,6 +193,12 @@ export default connect(
       dispatch(updateOperatingSystem(os)),
     changeTemplate: (template) =>
       dispatch(updateTemplate(template)),
+    changeVmName: (name) =>
+      dispatch(updateVmName(name)),
+    changeVmMemory: (memory) =>
+      dispatch(updateVmMemory(memory)),
+    changeVmCpu: (cpu) =>
+      dispatch(updateVmCpu(cpu)),
     closeDialog: () =>
       dispatch(closeDetail()),
   })

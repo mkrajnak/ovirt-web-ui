@@ -1,3 +1,30 @@
+export function updateVmName (name) {
+  return {
+    type: 'UPDATE_VM_NAME',
+    payload: {
+      name,
+    },
+  }
+}
+
+export function updateVmMemory (memory) {
+  return {
+    type: 'UPDATE_VM_MEMORY',
+    payload: {
+      memory,
+    },
+  }
+}
+
+export function updateVmCpu (cpu) {
+  return {
+    type: 'UPDATE_VM_CPU',
+    payload: {
+      cpu,
+    },
+  }
+}
+
 export function getAllOperatingSystems () {
   return {
     type: 'GET_ALL_OS',

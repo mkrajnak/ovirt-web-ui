@@ -35,6 +35,9 @@ import {
   updateCluster,
   updateTemplate,
   updateOperatingSystem,
+  updateVmMemory,
+  updateVmCpu,
+  updateVmName,
 } from './actions'
 
 import Api from './ovirtapi'
@@ -324,6 +327,9 @@ function* fetchAllTemplates (action) {
     yield put(addTemplates({ templates: templatesInternal }))
     const activeTemplate = templatesInternal.find(template => template.name === 'Blank')
     yield put(updateTemplate(activeTemplate))
+    yield put(updateVmMemory(activeTemplate.memory))
+    yield put(updateVmCpu(activeTemplate.cpu))
+    yield put(updateVmName(''))
   }
 }
 
