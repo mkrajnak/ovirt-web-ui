@@ -27,6 +27,8 @@ class AddVmDialog extends React.Component {
     this.changeVmName = this.changeVmName.bind(this)
     this.changeVmMemory = this.changeVmMemory.bind(this)
     this.changeVmCpu = this.changeVmCpu.bind(this)
+    this.getTemplate = this.getTemplate.bind(this)
+    this.getOperatingSystem = this.getOperatingSystem.bind(this)
   }
 
   componentDidUpdate () {
@@ -44,7 +46,7 @@ class AddVmDialog extends React.Component {
 
   createNewVm (e) {
     e.preventDefault()
-    let vm = {
+    const vm = {
       'vm': {
         'name': this.name.value,
         'template': { 'name': this.template.value },
@@ -59,27 +61,41 @@ class AddVmDialog extends React.Component {
     this.props.closeDialog()
   }
 
-  changeCluster () {
-    let cluster = this.props.clusters.get('clusters').toList().find(cluster =>
-      cluster.get('name') === this.cluster.value)
-    this.props.changeCluster(cluster)
+  getTemplate (name) {
+    return this.props.templates.get('templates').toList().find(template =>
+      template.get('name') === name)
   }
 
-  changeTemplate () {
-    let template = this.props.templates.get('templates').toList().find(template =>
-      template.get('name') === this.template.value)
+  getOperatingSystem (name) {
+    return this.props.operatingSystems.get('operatingSystems').toList().find(os =>
+      os.get('name') === name)
+  }
+
+  changeCluster () {
+    const cluster = this.props.clusters.get('clusters').toList().find(cluster =>
+      cluster.get('name') === this.cluster.value)
+    this.props.changeCluster(cluster)
+
+    const template = this.getTemplate('Blank')
+    this.updateTemplateDeps(template)
+  }
+
+  updateTemplateDeps (template) {
     this.props.changeTemplate(template)
 
-    let os = this.props.operatingSystems.get('operatingSystems').toList().find(os =>
-      os.get('name') === template.get('os'))
+    const os = this.getOperatingSystem(template.get('os'))
     this.props.changeOperatingSystem(os)
     this.props.changeVmMemory(template.get('memory'))
     this.props.changeVmCpu(template.get('cpu'))
   }
 
+  changeTemplate () {
+    const template = this.getTemplate(this.template.value)
+    this.updateTemplateDeps(template)
+  }
+
   changeOperatingSystem () {
-    let os = this.props.operatingSystems.get('operatingSystems').toList().find(os =>
-      os.get('name') === this.os.value)
+    const os = this.getOperatingSystem(this.os.value)
     this.props.changeOperatingSystem(os)
   }
 
@@ -103,35 +119,49 @@ class AddVmDialog extends React.Component {
         <form className='form-horizontal'>
           <LabeledSelect
             label='Cluster'
-            val={(input) => { this.cluster = input }}
+            getValue={(input) => { this.cluster = input }}
             onChange={this.changeCluster}
             value={this.props.cluster.get('name')}
             data={this.props.clusters.get('clusters')} />
 
-          <LabeledSelect label='Template' val={(input) => { this.template = input }} onChange={this.changeTemplate}
+          <LabeledSelect
+            label='Template'
+            getValue={(input) => { this.template = input }}
+            onChange={this.changeTemplate}
             value={this.props.template.get('name')}
             data={this.props.templates.get('templates').toList().filter(template => (
                 template.get('cluster') === this.props.cluster.get('id') || template.get('cluster') === '0'))} />
 
-          <LabeledSelect label='Operating System' val={(input) => { this.os = input }} onChange={this.changeOperatingSystem}
-            value={this.props.os.get('name')} data={this.props.operatingSystems.get('operatingSystems')}
+          <LabeledSelect
+            label='Operating System'
+            getValue={(input) => { this.os = input }}
+            onChange={this.changeOperatingSystem}
+            value={this.props.os.get('name')}
+            data={this.props.operatingSystems.get('operatingSystems')}
             renderer={(item) => item.get('description')} />
 
-          <LabeledTextField val={(input) => { this.memory = input }} id='vmMemory' label='Memory' placeholder='VM Memory'
-            key={this.props.memory} defaultValue={this.props.memory}
+          <LabeledTextField
+            getValue={(input) => { this.memory = input }}
+            id='vmMemory'
+            label='Memory'
+            placeholder='VM Memory'
+            value={this.props.memory}
             setValue={this.changeVmMemory} />
 
-          <LabeledTextField val={(input) => { this.cpus = input }} id='vmCpu' label='CPU' placeholder='CPUs'
-            key={this.props.cpu} defaultValue={this.props.cpu}
+          <LabeledTextField
+            getValue={(input) => { this.cpus = input }}
+            id='vmCpu'
+            label='CPU'
+            placeholder='CPUs'
+            value={this.props.cpu}
             setValue={this.changeVmCpu} />
 
           <LabeledTextField
-            val={(input) => { this.name = input }}
+            getValue={(input) => { this.name = input }}
             id='vmName'
             label='Name'
             placeholder='VM Name'
-            key={this.props.vmName}
-            defaultValue={this.props.vmName}
+            value={this.props.vmName}
             setValue={this.changeVmName} />
 
           <div className='form-group'>
