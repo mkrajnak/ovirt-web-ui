@@ -7,6 +7,22 @@ export function updateVmName (name) {
   }
 }
 
+export function blankAddNewVm () {
+  return {
+    type: 'BLANK_DIALOG',
+    payload: {},
+  }
+}
+
+export function updateDialogName (dialogName) {
+  return {
+    type: 'UPDATE_DIALOG_NAME',
+    payload: {
+      dialogName,
+    },
+  }
+}
+
 export function updateVmMemory (memory) {
   return {
     type: 'UPDATE_VM_MEMORY',

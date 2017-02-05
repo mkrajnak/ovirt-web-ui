@@ -38,6 +38,8 @@ import {
   updateVmMemory,
   updateVmCpu,
   updateVmName,
+  toggleAddNewVm,
+  updateDialogName,
 } from './actions'
 
 import Api from './ovirtapi'
@@ -264,6 +266,41 @@ function* startVm (action) {
   yield stopProgress({ vmId: action.payload.vmId, name: 'start', result })
 }
 
+function* editVm (action) {
+  yield put(updateDialogName('Edit VM'))
+  const cluster = Selectors.getClusterById(action.payload.vm.get('cluster').get('id'))
+  yield put(updateCluster(cluster))
+
+  const template = Selectors.getTemplateById(action.payload.vm.get('template').get('id'))
+  yield put(updateTemplate(template))
+
+  const os = Selectors.getOperatingSystemByName(action.payload.vm.get('os').get('type'))
+  yield put(updateOperatingSystem(os))
+
+  const name = action.payload.vm.get('name')
+  yield put(updateVmName(name))
+
+  const memory = action.payload.vm.get('memory').get('guaranteed')
+  yield put(updateVmMemory(memory))
+
+  const cpu = action.payload.vm.get('cpu').get('vCPUs')
+  yield put(updateVmCpu(cpu))
+  yield put(toggleAddNewVm())
+  yield put(setVmDetailToShow({ vmId: action.payload.vm.get('id') }))
+}
+
+function* blankAddNewVm (action) {
+  yield put(updateDialogName('Create a new VM'))
+  const cluster = Selectors.getFirstCluster()
+  yield put(updateCluster(cluster))
+
+  const blankTemplate = Selectors.getTemplateByName('Blank')
+  yield put(updateTemplate(blankTemplate))
+  yield put(updateVmMemory(blankTemplate.memory))
+  yield put(updateVmCpu(blankTemplate.cpu))
+  yield put(updateVmName(''))
+}
+
 function* fetchConsoleVmMeta ({ vmId }) {
   const consoles = yield callExternalAction('consoles', Api.consoles, { action: 'INTERNAL_CONSOLES', payload: { vmId } })
 
@@ -372,6 +409,8 @@ export function *rootSaga () {
     takeEvery('START_VM', startVm),
     takeEvery('GET_CONSOLE_VM', getConsoleVm),
     takeEvery('SUSPEND_VM', suspendVm),
+    takeEvery('EDIT_VM', editVm),
+    takeEvery('BLANK_DIALOG', blankAddNewVm),
 
     takeEvery('SELECT_VM_DETAIL', selectVmDetail),
 

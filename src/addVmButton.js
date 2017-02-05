@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
 
-import { toggleAddNewVm } from './actions'
+import { blankAddNewVm } from './actions'
 
 const AddVmButton = ({ name, toggleDialog }) => {
   return (
@@ -27,6 +27,6 @@ export default connect(
   (state) => ({}),
   (dispatch) => ({
     toggleDialog: () =>
-      dispatch(toggleAddNewVm()),
+      dispatch(blankAddNewVm()),
   })
 )(AddVmButton)

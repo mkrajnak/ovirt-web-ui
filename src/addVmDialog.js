@@ -51,6 +51,10 @@ class AddVmDialog extends React.Component {
         'name': this.name.value,
         'template': { 'name': this.template.value },
         'cluster': { 'name': this.cluster.value },
+        'memory': this.memory.value,
+        'os': { 'type': this.os.value },
+        'cpu': { 'topology': { 'sockets': this.cpus.value },
+        },
       },
     }
     this.props.addVm(vm)
@@ -114,7 +118,7 @@ class AddVmDialog extends React.Component {
   render () {
     return (
       <DetailContainer>
-        <h1>Create a new vm</h1>
+        <h1>{this.props.heading}</h1>
         <hr />
         <form className='form-horizontal'>
           <LabeledSelect
@@ -177,6 +181,7 @@ class AddVmDialog extends React.Component {
 }
 
 AddVmDialog.propTypes = {
+  heading: PropTypes.string.isRequired,
   clusters: PropTypes.object.isRequired,
   cluster: PropTypes.object.isRequired,
   templates: PropTypes.object.isRequired,
@@ -212,6 +217,7 @@ export default connect(
     os: state.addVm.get('os'),
     memory: state.addVm.get('memory'),
     cpu: state.addVm.get('cpu'),
+    heading: state.addVm.get('dialogName'),
     vmName: state.addVm.get('name'),
   }),
   (dispatch) => ({

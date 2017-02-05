@@ -30,8 +30,13 @@ function updateVmCpu ({ state, payload: { cpu } }) {
   return state.set('cpu', imUpdates)
 }
 
+function updateDialogName ({ state, payload: { dialogName } }) {
+  const imUpdates = Immutable.fromJS(dialogName)
+  return state.set('dialogName', imUpdates)
+}
+
 function addNewVmReducer (state, action) {
-  state = state || Immutable.fromJS({ cluster: {}, template: {}, os: {}, name: {}, memory: {}, cpu: {} })
+  state = state || Immutable.fromJS({ cluster: {}, template: {}, os: {}, name: {}, memory: {}, cpu: {}, dialogName: {} })
 
   switch (action.type) {
     case 'UPDATE_CLUSTER':
@@ -46,6 +51,8 @@ function addNewVmReducer (state, action) {
       return updateVmMemory({ state, payload: action.payload })
     case 'UPDATE_VM_CPU':
       return updateVmCpu({ state, payload: action.payload })
+    case 'UPDATE_DIALOG_NAME':
+      return updateDialogName({ state, payload: action.payload })
     default:
       return state
   }
