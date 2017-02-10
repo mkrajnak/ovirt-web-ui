@@ -38,8 +38,12 @@ import {
   updateVmMemory,
   updateVmCpu,
   updateVmName,
-  toggleAddNewVm,
-  updateDialogName,
+  updateDialogType,
+  updateVmId,
+  openVmDialog,
+  closeVmDialog,
+  openVmDetail,
+  closeVmDetail,
 } from './actions'
 
 import Api from './ovirtapi'
@@ -266,13 +270,15 @@ function* startVm (action) {
   yield stopProgress({ vmId: action.payload.vmId, name: 'start', result })
 }
 
-function* editVm (action) {
-  yield put(updateDialogName('Edit VM'))
+function* showEditVm (action) {
+  yield put(updateDialogType('edit'))
   const cluster = Selectors.getClusterById(action.payload.vm.get('cluster').get('id'))
   yield put(updateCluster(cluster))
 
   const template = Selectors.getTemplateById(action.payload.vm.get('template').get('id'))
   yield put(updateTemplate(template))
+
+  yield put(updateVmId(action.payload.vm.get('id')))
 
   const os = Selectors.getOperatingSystemByName(action.payload.vm.get('os').get('type'))
   yield put(updateOperatingSystem(os))
@@ -285,20 +291,32 @@ function* editVm (action) {
 
   const cpu = action.payload.vm.get('cpu').get('vCPUs')
   yield put(updateVmCpu(cpu))
-  yield put(toggleAddNewVm())
+  yield put(openVmDialog())
   yield put(setVmDetailToShow({ vmId: action.payload.vm.get('id') }))
 }
 
-function* blankAddNewVm (action) {
-  yield put(updateDialogName('Create a new VM'))
+function* showAddNewVm (action) {
+  yield put(setVmDetailToShow({ vmId: '0' }))
+  yield put(updateDialogType('create'))
   const cluster = Selectors.getFirstCluster()
   yield put(updateCluster(cluster))
 
-  const blankTemplate = Selectors.getTemplateByName('Blank')
+  yield put(openVmDialog())
+  const blankTemplate = Selectors.getTemplateById('00000000-0000-0000-0000-000000000000')
   yield put(updateTemplate(blankTemplate))
-  yield put(updateVmMemory(blankTemplate.memory))
-  yield put(updateVmCpu(blankTemplate.cpu))
+  yield put(updateVmMemory(blankTemplate.get('memory')))
+  yield put(updateVmCpu(blankTemplate.get('cpu')))
+
+  const os = Selectors.getOperatingSystemByName(blankTemplate.get('os'))
+  yield put(updateOperatingSystem(os))
+
+  yield put(updateVmId('0'))
   yield put(updateVmName(''))
+}
+
+function* closeDialog () {
+  yield put(closeVmDialog())
+  yield put(closeVmDetail())
 }
 
 function* fetchConsoleVmMeta ({ vmId }) {
@@ -333,6 +351,7 @@ function* getConsoleVm (action) {
 }
 
 function* selectVmDetail (action) {
+  yield put(openVmDetail())
   yield put(setVmDetailToShow({ vmId: action.payload.vmId }))
   yield fetchSingleVm(getSingleVm({ vmId: action.payload.vmId }))
 }
@@ -353,6 +372,11 @@ function* schedulerPerMinute (action) {
 
 function* createNewVm (action) {
   yield callExternalAction('addNewVm', Api.addNewVm, action)
+  yield put(getAllVms({ shallowFetch: false }))
+}
+
+function* editVm (action) {
+  yield callExternalAction('editVm', Api.editVm, action)
   yield put(getAllVms({ shallowFetch: false }))
 }
 
@@ -399,6 +423,7 @@ export function *rootSaga () {
     takeEvery('LOGOUT', logout),
     takeLatest('GET_ALL_VMS', fetchAllVms),
     takeLatest('ADD_NEW_VM', createNewVm),
+    takeLatest('EDIT_VM', editVm),
     takeLatest('GET_ALL_CLUSTERS', fetchAllClusters),
     takeLatest('GET_ALL_TEMPLATES', fetchAllTemplates),
     takeLatest('GET_ALL_OS', fetchAllOS),
@@ -409,8 +434,9 @@ export function *rootSaga () {
     takeEvery('START_VM', startVm),
     takeEvery('GET_CONSOLE_VM', getConsoleVm),
     takeEvery('SUSPEND_VM', suspendVm),
-    takeEvery('EDIT_VM', editVm),
-    takeEvery('BLANK_DIALOG', blankAddNewVm),
+    takeEvery('SHOW_EDIT_VM', showEditVm),
+    takeEvery('SHOW_BLANK_DIALOG', showAddNewVm),
+    takeEvery('CLOSE_DETAIL', closeDialog),
 
     takeEvery('SELECT_VM_DETAIL', selectVmDetail),
 

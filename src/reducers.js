@@ -11,8 +11,8 @@ import {
 import templates from './templateReducer'
 import clusters from './clustersReducer'
 import operatingSystems from './OSReducer'
-import addVmVisibility from './addVmVisibility'
-import addVm from './addVMReducer'
+import dialogVisibility from './dialogVisibility'
+import vmDialog from './vmDialogReducer'
 
 function router (redirectUrl = '/', action) {
   switch (action.type) {
@@ -32,7 +32,7 @@ export default combineReducers({
   router,
   templates,
   clusters,
-  addVmVisibility,
-  addVm,
+  dialogVisibility,
+  vmDialog,
   operatingSystems,
 })

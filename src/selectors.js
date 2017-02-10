@@ -28,10 +28,6 @@ Selectors = {
     return getState().templates.get('templates').toList().find(template =>
       template.get('id') === id)
   },
-  getTemplateByName (name) {
-    return getState().templates.get('templates').toList().find(template =>
-      template.get('name') === name)
-  },
   getOperatingSystemByName (name) {
     return getState().operatingSystems.get('operatingSystems').toList().find(os =>
       os.get('name') === name)

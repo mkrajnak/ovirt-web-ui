@@ -256,9 +256,14 @@ OvirtApi = {
     return OvirtApi._httpGet({ url })
   },
   addNewVm ({ vm }) {
-    console.log('API')
     OvirtApi._assertLogin({ methodName: 'addNewVm' })
     return OvirtApi._httpPostJSON({ url: `/api/vms`, input: JSON.stringify(vm) })
+  },
+  editVm ({ vm, vmId }) {
+    console.log('FUCK MY LIFE')
+    console.log(vmId)
+    OvirtApi._assertLogin({ methodName: 'editVm' })
+    return OvirtApi._httpPostJSON({ url: `${AppConfiguration.applicationContext}/api/vms/${vmId}`, input: JSON.stringify(vm) })
   },
   shutdown ({ vmId }) {
     OvirtApi._assertLogin({ methodName: 'shutdown' })

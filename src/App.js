@@ -4,20 +4,21 @@ import { connect } from 'react-redux'
 import './App.css'
 
 import { VmsList, VmDetail, VmsPageHeader, Options } from 'ovirt-ui-components'
-import AddVmDialog from './addVmDialog'
+import VmDialog from './vmDialog'
 import AddVmButton from './addVmButton'
 
-const App = ({ vms, visibility, addVmVisibility }) => {
+const App = ({ vms, visibility, dialogVisibility }) => {
   const selectedVmId = visibility.get('selectedVmDetail')
   const showOptions = visibility.get('showOptions')
-  const addNewVm = addVmVisibility.get('showAddNewVm')
+  const showVmDialog = dialogVisibility.get('showVmDialog')
+  const showVmDetail = dialogVisibility.get('showVmDetail')
 
   let detailToRender = ''
   if (showOptions) {
     detailToRender = (<Options />)
-  } else if (addNewVm && selectedVmId) {
-    detailToRender = (<AddVmDialog />)
-  } else if (selectedVmId) {
+  } else if (showVmDialog) {
+    detailToRender = (<VmDialog />)
+  } else if (showVmDetail && selectedVmId) {
     const selectedVm = selectedVmId ? vms.getIn(['vms', selectedVmId]) : undefined
     detailToRender = (<VmDetail vm={selectedVm} />)
   }
@@ -37,13 +38,13 @@ const App = ({ vms, visibility, addVmVisibility }) => {
 App.propTypes = {
   vms: PropTypes.object.isRequired,
   visibility: PropTypes.object.isRequired,
-  addVmVisibility: PropTypes.object.isRequired,
+  dialogVisibility: PropTypes.object.isRequired,
 }
 
 export default connect(
   (state) => ({
     vms: state.vms,
     visibility: state.visibility,
-    addVmVisibility: state.addVmVisibility,
+    dialogVisibility: state.dialogVisibility,
   })
 )(App)

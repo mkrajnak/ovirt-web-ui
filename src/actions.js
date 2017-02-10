@@ -1,24 +1,33 @@
+export function blankAddNewVm () {
+  return {
+    type: 'SHOW_BLANK_DIALOG',
+    payload: {},
+  }
+}
+
+export function updateDialogType (dialogType) {
+  return {
+    type: 'UPDATE_DIALOG_TYPE',
+    payload: {
+      dialogType,
+    },
+  }
+}
+
+export function updateVmId (vmId) {
+  return {
+    type: 'UPDATE_VM_ID',
+    payload: {
+      vmId,
+    },
+  }
+}
+
 export function updateVmName (name) {
   return {
     type: 'UPDATE_VM_NAME',
     payload: {
       name,
-    },
-  }
-}
-
-export function blankAddNewVm () {
-  return {
-    type: 'BLANK_DIALOG',
-    payload: {},
-  }
-}
-
-export function updateDialogName (dialogName) {
-  return {
-    type: 'UPDATE_DIALOG_NAME',
-    payload: {
-      dialogName,
     },
   }
 }
@@ -75,6 +84,16 @@ export function addNewVm ({ vm }) {
   }
 }
 
+export function editVm (vm, vmId) {
+  return {
+    type: 'EDIT_VM',
+    payload: {
+      vm,
+      vmId,
+    },
+  }
+}
+
 export function closeDetail () {
   return {
     type: 'CLOSE_DETAIL',
@@ -83,9 +102,33 @@ export function closeDetail () {
   }
 }
 
-export function toggleAddNewVm () {
+export function openVmDetail () {
   return {
-    type: 'TOGGLE_ADD_NEW_VM',
+    type: 'OPEN_VM_DETAIL',
+    payload: {
+    },
+  }
+}
+
+export function closeVmDetail () {
+  return {
+    type: 'CLOSE_VM_DETAIL',
+    payload: {
+    },
+  }
+}
+
+export function openVmDialog () {
+  return {
+    type: 'OPEN_VM_DIALOG',
+    payload: {
+    },
+  }
+}
+
+export function closeVmDialog () {
+  return {
+    type: 'CLOSE_VM_DIALOG',
     payload: {
     },
   }
