@@ -53,23 +53,19 @@ class vmDialog extends React.Component {
 
   editVm () {
     const vm = {
-      'vm': {
-        'name': this.name.value,
-        'template': { 'name': this.template.value },
-        'cluster': { 'name': this.cluster.value },
-        'memory': this.memory.value,
-        'os': { 'type': this.os.value },
-        'cpu': {
-          'topology': {
-            'cores': '1',
-            'sockets': this.cpus.value,
-            'threads': '1',
-          },
+      'name': this.name.value,
+      'template': { 'name': this.template.value },
+      'cluster': { 'name': this.cluster.value },
+      'memory': this.memory.value,
+      'os': { 'type': this.os.value },
+      'cpu': {
+        'topology': {
+          'cores': '1',
+          'sockets': this.cpus.value,
+          'threads': '1',
         },
       },
     }
-    console.log('put')
-    console.log(this.props.vmId)
     this.props.edit(vm, this.props.vmId)
   }
 

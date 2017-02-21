@@ -63,6 +63,20 @@ OvirtApi = {
         return Promise.reject(data)
       })
   },
+  _httpPut ({ url, input }) {
+    return $.ajax(url, {
+      type: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OvirtApi._getLoginToken()}`,
+      },
+      data: input,
+    }).then(data => Promise.resolve(data))
+      .catch(data => {
+        return Promise.reject(data)
+      })
+  },
   // ----
   /**
    * @param vm - Single entry from oVirt REST /api/vms
@@ -261,7 +275,7 @@ OvirtApi = {
   },
   editVm ({ vm, vmId }) {
     OvirtApi._assertLogin({ methodName: 'editVm' })
-    return OvirtApi._httpPostJSON({ url: `${AppConfiguration.applicationContext}/api/vms/${vmId}`, input: JSON.stringify(vm) })
+    return OvirtApi._httpPut({ url: `/api/vms/${vmId}`, input: JSON.stringify(vm) })
   },
   shutdown ({ vmId }) {
     OvirtApi._assertLogin({ methodName: 'shutdown' })
