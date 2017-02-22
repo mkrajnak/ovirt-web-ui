@@ -134,6 +134,22 @@ export function closeVmDialog () {
   }
 }
 
+export function openEditTemplate () {
+  return {
+    type: 'OPEN_EDIT_TEMPLATE',
+    payload: {
+    },
+  }
+}
+
+export function closeEditTemplate () {
+  return {
+    type: 'CLOSE_EDIT_TEMPLATE',
+    payload: {
+    },
+  }
+}
+
 export function addClusters ({ clusters }) {
   return {
     type: 'ADD_CLUSTERS',
@@ -182,6 +198,69 @@ export function updateTemplate (template) {
     type: 'UPDATE_TEMPLATE',
     payload: {
       template,
+    },
+  }
+}
+
+export function updateEditTemplate (template) {
+  return {
+    type: 'UPDATE_EDIT_TEMPLATE',
+    payload: {
+      template,
+    },
+  }
+}
+
+export function updateEditTemplateId (Id) {
+  return {
+    type: 'UPDATE_EDIT_TEMPLATE_ID',
+    payload: {
+      Id,
+    },
+  }
+}
+
+export function updateEditTemplateName (name) {
+  return {
+    type: 'UPDATE_EDIT_TEMPLATE_NAME',
+    payload: {
+      name,
+    },
+  }
+}
+
+export function updateEditTemplateOs (os) {
+  return {
+    type: 'UPDATE_EDIT_TEMPLATE_OS',
+    payload: {
+      os,
+    },
+  }
+}
+
+export function updateEditTemplateMemory (memory) {
+  return {
+    type: 'UPDATE_EDIT_TEMPLATE_MEMORY',
+    payload: {
+      memory,
+    },
+  }
+}
+
+export function updateEditTemplateCpu (cpu) {
+  return {
+    type: 'UPDATE_EDIT_TEMPLATE_CPU',
+    payload: {
+      cpu,
+    },
+  }
+}
+
+export function updateEditTemplateDescription (description) {
+  return {
+    type: 'UPDATE_EDIT_TEMPLATE_DESCRIPTION',
+    payload: {
+      description,
     },
   }
 }

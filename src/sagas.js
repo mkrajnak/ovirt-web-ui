@@ -44,6 +44,8 @@ import {
   closeVmDialog,
   openVmDetail,
   closeVmDetail,
+  updateEditTemplate,
+  closeEditTemplate,
 } from './actions'
 
 import Api from './ovirtapi'
@@ -314,9 +316,14 @@ function* showAddNewVm (action) {
   yield put(updateVmName(''))
 }
 
+function* showEditTemplate () {
+  yield put(setVmDetailToShow({ vmId: '0' }))
+}
+
 function* closeDialog () {
   yield put(closeVmDialog())
   yield put(closeVmDetail())
+  yield put(closeEditTemplate())
 }
 
 function* fetchConsoleVmMeta ({ vmId }) {
@@ -386,11 +393,14 @@ function* fetchAllTemplates (action) {
   if (templates && templates['template']) {
     const templatesInternal = templates.template.map(template => Api.templateToInternal({ template }))
     yield put(addTemplates({ templates: templatesInternal }))
-    const activeTemplate = templatesInternal.find(template => template.name === 'Blank')
+    // update template in store for add vm dialog
+    const activeTemplate = Selectors.getTemplateById('00000000-0000-0000-0000-000000000000')
     yield put(updateTemplate(activeTemplate))
     yield put(updateVmMemory(activeTemplate.memory))
     yield put(updateVmCpu(activeTemplate.cpu))
     yield put(updateVmName(''))
+    // update template in store for edit template dialog
+    yield put(updateEditTemplate(activeTemplate))
   }
 }
 
@@ -435,6 +445,7 @@ export function *rootSaga () {
     takeEvery('GET_CONSOLE_VM', getConsoleVm),
     takeEvery('SUSPEND_VM', suspendVm),
     takeEvery('SHOW_EDIT_VM', showEditVm),
+    takeEvery('SHOW_EDIT_TEMPLATE', showEditTemplate),
     takeEvery('SHOW_BLANK_DIALOG', showAddNewVm),
     takeEvery('CLOSE_DETAIL', closeDialog),
 
