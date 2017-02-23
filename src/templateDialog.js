@@ -6,13 +6,13 @@ import LabeledSelect from './labeledSelect'
 import LabeledTextField from './labeledTextField'
 import DetailContainer from './DetailContainer'
 import {
-  updateEditTemplateId,
   updateEditTemplateName,
   updateEditTemplateDescription,
   updateEditTemplate,
   updateEditTemplateOs,
   updateEditTemplateMemory,
   updateEditTemplateCpu,
+  editTemplate,
   closeDetail,
 } from './actions'
 
@@ -24,7 +24,6 @@ class templateDialog extends React.Component {
     this.changeOperatingSystem = this.changeOperatingSystem.bind(this)
     this.changeMemory = this.changeMemory.bind(this)
     this.changeCpu = this.changeCpu.bind(this)
-    this.changeId = this.changeId.bind(this)
     this.changeName = this.changeName.bind(this)
     this.changeDescription = this.changeDescription.bind(this)
     this.editTemplate = this.editTemplate.bind(this)
@@ -45,26 +44,28 @@ class templateDialog extends React.Component {
     $(this.templateOs).selectpicker()
   }
 
-  changeId () {
-    this.props.changeId(this.templateId.value)
-  }
-
   changeName () {
-    this.props.changeName(this.tempalateName.value)
+    this.props.changeName(this.templateName.value)
   }
 
   getOperatingSystem (name) {
     return this.props.operatingSystems.get('operatingSystems').toList().find(os =>
-      os.get('name') === name)
+      os.get('name') === name || os.get('description') === name)
   }
 
   updateTemplateDeps (template) {
     this.props.changeTemplate(template)
 
     const os = this.getOperatingSystem(template.get('os'))
-    this.props.changeOperatingSystem(os)
+    this.props.changeOperatingSystem(os.get('description'))
     this.props.changeMemory(template.get('memory'))
     this.props.changeCpu(template.get('cpu'))
+
+    if (template.get('description')) {
+      this.props.changeDescription(template.get('description'))
+    } else {
+      this.props.changeDescription('')
+    }
   }
 
   getTemplate (name) {
@@ -78,8 +79,7 @@ class templateDialog extends React.Component {
   }
 
   changeOperatingSystem () {
-    const os = this.getOperatingSystem(this.os.value)
-    this.props.changeOperatingSystem(os)
+    this.props.changeOperatingSystem(this.templateOs.value)
   }
 
   changeDescription () {
@@ -102,7 +102,6 @@ class templateDialog extends React.Component {
   editTemplate (e) {
     e.preventDefault()
     const template = {
-      'id': this.templateId.value,
       'name': this.templateName.value,
       'description': this.templateDescription.value,
       'memory': this.templateMemory.value,
@@ -116,7 +115,9 @@ class templateDialog extends React.Component {
       'os': this.templateOs.value,
     }
     // TODO
-    console.log(template)
+    console.log('One does not simply********************************')
+    console.log(template, this.props.template.get('id'))
+    this.props.editTemplate(template, this.props.template.get('id'))
   }
 
   render () {
@@ -131,14 +132,6 @@ class templateDialog extends React.Component {
             onChange={this.changeTemplate}
             value={this.props.template.get('name')}
             data={this.props.templates.get('templates').toList()} />
-
-          <LabeledTextField
-            label='Id'
-            getValue={(input) => { this.templateId = input }}
-            id='templateId'
-            placeholder='Template id'
-            value={this.props.template.get('id')}
-            setValue={this.changeId} />
 
           <LabeledTextField
             label='Name'
@@ -160,7 +153,7 @@ class templateDialog extends React.Component {
             label='Operating System'
             getValue={(input) => { this.templateOs = input }}
             onChange={this.changeOperatingSystem}
-            value={this.props.template.get('os')}
+            value={this.getOperatingSystem(this.props.template.get('os')).get('name')}
             data={this.props.operatingSystems.get('operatingSystems')}
             renderer={(item) => item.get('description')} />
 
@@ -199,12 +192,12 @@ templateDialog.propTypes = {
   operatingSystems: PropTypes.object.isRequired,
   template: PropTypes.object.isRequired,
   changeTemplate: PropTypes.func.isRequired,
-  changeId: PropTypes.func.isRequired,
   changeName: PropTypes.func.isRequired,
   changeDescription: PropTypes.func.isRequired,
   changeCpu: PropTypes.func.isRequired,
   changeMemory: PropTypes.func.isRequired,
   changeOperatingSystem: PropTypes.func.isRequired,
+  editTemplate: PropTypes.func.isRequired,
   closeDialog: PropTypes.func.isRequired,
 }
 
@@ -212,11 +205,9 @@ export default connect(
   (state) => ({
     templates: state.templates,
     operatingSystems: state.operatingSystems,
-    template: state.editTemplate.get('template'),
+    template: state.editTemplate,
   }),
   (dispatch) => ({
-    changeId: (template) =>
-      dispatch(updateEditTemplateId(template)),
     changeName: (template) =>
       dispatch(updateEditTemplateName(template)),
     changeDescription: (description) =>
@@ -229,6 +220,8 @@ export default connect(
       dispatch(updateEditTemplateMemory(template)),
     changeCpu: (template) =>
       dispatch(updateEditTemplateCpu(template)),
+    editTemplate: (template, templateId) =>
+      dispatch(editTemplate(template, templateId)),
     closeDialog: () =>
       dispatch(closeDetail()),
   })

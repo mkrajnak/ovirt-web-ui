@@ -1,13 +1,7 @@
 import Immutable from 'immutable'
 
 function updateTemplate ({ state, payload: { template } }) {
-  const imUpdates = Immutable.fromJS(template)
-  return state.set('template', imUpdates)
-}
-
-function updateId ({ state, payload: { id } }) {
-  const imUpdates = Immutable.fromJS(id)
-  return state.set('id', imUpdates)
+  return Immutable.fromJS(template)
 }
 
 function updateName ({ state, payload: { name } }) {
@@ -36,13 +30,11 @@ function updateCpu ({ state, payload: { cpu } }) {
 }
 
 function editTemplateReducer (state, action) {
-  state = state || Immutable.fromJS({ })
+  state = state || Immutable.fromJS({ id: '', cluster: '', os: '', name: '', memory: '', cpu: '' })
 
   switch (action.type) {
     case 'UPDATE_EDIT_TEMPLATE':
       return updateTemplate({ state, payload: action.payload })
-    case 'UPDATE_EDIT_TEMPLATE_ID':
-      return updateId({ state, payload: action.payload })
     case 'UPDATE_EDIT_TEMPLATE_NAME':
       return updateName({ state, payload: action.payload })
     case 'UPDATE_EDIT_TEMPLATE_OS':

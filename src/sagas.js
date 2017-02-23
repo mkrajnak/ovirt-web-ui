@@ -387,6 +387,11 @@ function* editVm (action) {
   yield put(getAllVms({ shallowFetch: false }))
 }
 
+function* editTemplate (action) {
+  yield callExternalAction('editTemplate', Api.editTemplate, action)
+  yield put(getAllTemplates({ shallowFetch: false }))
+}
+
 function* fetchAllTemplates (action) {
   const templates = yield callExternalAction('getAllTemplates', Api.getAllTemplates, action)
 
@@ -434,6 +439,7 @@ export function *rootSaga () {
     takeLatest('GET_ALL_VMS', fetchAllVms),
     takeLatest('ADD_NEW_VM', createNewVm),
     takeLatest('EDIT_VM', editVm),
+    takeLatest('EDIT_TEMPLATE', editTemplate),
     takeLatest('GET_ALL_CLUSTERS', fetchAllClusters),
     takeLatest('GET_ALL_TEMPLATES', fetchAllTemplates),
     takeLatest('GET_ALL_OS', fetchAllOS),

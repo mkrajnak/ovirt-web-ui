@@ -277,6 +277,10 @@ OvirtApi = {
     OvirtApi._assertLogin({ methodName: 'editVm' })
     return OvirtApi._httpPut({ url: `/api/vms/${vmId}`, input: JSON.stringify(vm) })
   },
+  editTemplate ({ template, templateId }) {
+    OvirtApi._assertLogin({ methodName: 'editTemplate' })
+    return OvirtApi._httpPut({ url: `/api/templates/${templateId}`, input: JSON.stringify(template) })
+  },
   shutdown ({ vmId }) {
     OvirtApi._assertLogin({ methodName: 'shutdown' })
     return OvirtApi._httpPost({ url: `${AppConfiguration.applicationContext}/api/vms/${vmId}/shutdown`, input: '<action />' })

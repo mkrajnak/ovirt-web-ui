@@ -94,6 +94,16 @@ export function editVm (vm, vmId) {
   }
 }
 
+export function editTemplate (template, templateId) {
+  return {
+    type: 'EDIT_TEMPLATE',
+    payload: {
+      template,
+      templateId,
+    },
+  }
+}
+
 export function closeDetail () {
   return {
     type: 'CLOSE_DETAIL',
@@ -207,15 +217,6 @@ export function updateEditTemplate (template) {
     type: 'UPDATE_EDIT_TEMPLATE',
     payload: {
       template,
-    },
-  }
-}
-
-export function updateEditTemplateId (Id) {
-  return {
-    type: 'UPDATE_EDIT_TEMPLATE_ID',
-    payload: {
-      Id,
     },
   }
 }
