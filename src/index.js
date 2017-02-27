@@ -13,6 +13,8 @@ window.$ = window.jQuery = require('jquery')
 require('bootstrap/dist/js/bootstrap')
 window.patternfly = {}
 window.patternfly = require('patternfly/dist/js/patternfly')
+window.selectpicker = {}
+window.selectpicker = require('bootstrap-select/dist/js/bootstrap-select')
 
 import store, { sagaMiddleware } from './store'
 import Selectors from './selectors'

@@ -17,6 +17,21 @@ Selectors = {
   getVmDisks ({ vmId }) {
     return getState().vms.getIn(['vms', vmId, 'disks'])
   },
+  getFirstCluster () {
+    return getState().clusters.get('clusters').toList().first()
+  },
+  getClusterById (id) {
+    return getState().clusters.get('clusters').toList().find(cluster =>
+      cluster.get('id') === id)
+  },
+  getTemplateById (id) {
+    return getState().templates.get('templates').toList().find(template =>
+      template.get('id') === id)
+  },
+  getOperatingSystemByName (name) {
+    return getState().operatingSystems.get('operatingSystems').toList().find(os =>
+      os.get('name') === name)
+  },
 }
 
 function getState () {

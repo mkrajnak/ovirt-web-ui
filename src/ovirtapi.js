@@ -46,6 +46,35 @@ OvirtApi = {
         return Promise.reject(data)
       })
   },
+  _httpPostJSON ({ url, input }) {
+    return $.ajax(url, {
+      type: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OvirtApi._getLoginToken()}`,
+        'Filter': 'true',
+      },
+      data: input,
+    }).then(data => Promise.resolve(data))
+      .catch(data => {
+        return Promise.reject(data)
+      })
+  },
+  _httpPut ({ url, input }) {
+    return $.ajax(url, {
+      type: 'PUT',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OvirtApi._getLoginToken()}`,
+      },
+      data: input,
+    }).then(data => Promise.resolve(data))
+      .catch(data => {
+        return Promise.reject(data)
+      })
+  },
   // ----
   /**
    * @param vm - Single entry from oVirt REST /api/vms
@@ -141,6 +170,45 @@ OvirtApi = {
       format: disk['format'],
     }
   },
+
+  templateToInternal ({ template }) {
+    if (template.cluster) {
+      return {
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        cluster: template.cluster.id,
+        memory: template.memory,
+        cpu: template.cpu.topology.sockets,
+        os: template.os.type,
+      }
+    }
+    return {
+      id: template.id,
+      name: template.name,
+      description: template.description,
+      cluster: '0',
+      memory: template.memory,
+      cpu: template.cpu.topology.sockets,
+      os: template.os.type,
+    }
+  },
+
+  clusterToInternal ({ cluster }) {
+    return {
+      id: cluster.id,
+      name: cluster.name,
+    }
+  },
+
+  OSToInternal ({ os }) {
+    return {
+      id: os.id,
+      name: os.name,
+      description: os.description,
+    }
+  },
+
   iconToInternal ({ icon }) {
     return {
       id: icon.id,
@@ -183,6 +251,33 @@ OvirtApi = {
     OvirtApi._assertLogin({ methodName: 'getAllVms' })
     const url = `${AppConfiguration.applicationContext}/api/vms`
     return OvirtApi._httpGet({ url })
+  },
+  getAllTemplates () {
+    OvirtApi._assertLogin({ methodName: 'getAllTemplates' })
+    const url = '/api/templates'
+    return OvirtApi._httpGet({ url })
+  },
+  getAllClusters () {
+    OvirtApi._assertLogin({ methodName: 'getAllClusters' })
+    const url = '/api/clusters'
+    return OvirtApi._httpGet({ url })
+  },
+  getAllOperatingSystems () {
+    OvirtApi._assertLogin({ methodName: 'getAllOperatingSystems' })
+    const url = '/api/operatingsystems'
+    return OvirtApi._httpGet({ url })
+  },
+  addNewVm ({ vm }) {
+    OvirtApi._assertLogin({ methodName: 'addNewVm' })
+    return OvirtApi._httpPostJSON({ url: `/api/vms`, input: JSON.stringify(vm) })
+  },
+  editVm ({ vm, vmId }) {
+    OvirtApi._assertLogin({ methodName: 'editVm' })
+    return OvirtApi._httpPut({ url: `/api/vms/${vmId}`, input: JSON.stringify(vm) })
+  },
+  editTemplate ({ template, templateId }) {
+    OvirtApi._assertLogin({ methodName: 'editTemplate' })
+    return OvirtApi._httpPut({ url: `/api/templates/${templateId}`, input: JSON.stringify(template) })
   },
   shutdown ({ vmId }) {
     OvirtApi._assertLogin({ methodName: 'shutdown' })

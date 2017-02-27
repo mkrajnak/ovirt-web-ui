@@ -23,7 +23,31 @@ import {
 } from 'ovirt-ui-components'
 
 // import store from './store'
-import { persistState, getSingleVm } from './actions'
+import {
+  persistState,
+  getSingleVm,
+  getAllTemplates,
+  getAllClusters,
+  getAllOperatingSystems,
+  addClusters,
+  addTemplates,
+  addAllOS,
+  updateCluster,
+  updateTemplate,
+  updateOperatingSystem,
+  updateVmMemory,
+  updateVmCpu,
+  updateVmName,
+  updateDialogType,
+  updateVmId,
+  openVmDialog,
+  closeVmDialog,
+  openVmDetail,
+  closeVmDetail,
+  updateEditTemplate,
+  closeEditTemplate,
+} from './actions'
+
 import Api from './ovirtapi'
 import { persistStateToLocalStorage } from './storage'
 import Selectors from './selectors'
@@ -81,6 +105,9 @@ function* login (action) {
 
     yield put(loginSuccessful({ token, username }))
     yield put(getAllVms({ shallowFetch: false }))
+    yield put(getAllClusters()) // no shallow
+    yield put(getAllOperatingSystems())
+    yield put(getAllTemplates({ shallowFetch: false }))
   } else {
     yield put(loginFailed({
       errorCode: result['error_code'] ? result['error_code'] : 'no_access',
@@ -245,6 +272,60 @@ function* startVm (action) {
   yield stopProgress({ vmId: action.payload.vmId, name: 'start', result })
 }
 
+function* showEditVm (action) {
+  yield put(updateDialogType('edit'))
+  const cluster = Selectors.getClusterById(action.payload.vm.get('cluster').get('id'))
+  yield put(updateCluster(cluster))
+
+  const template = Selectors.getTemplateById(action.payload.vm.get('template').get('id'))
+  yield put(updateTemplate(template))
+
+  yield put(updateVmId(action.payload.vm.get('id')))
+
+  const os = Selectors.getOperatingSystemByName(action.payload.vm.get('os').get('type'))
+  yield put(updateOperatingSystem(os))
+
+  const name = action.payload.vm.get('name')
+  yield put(updateVmName(name))
+
+  const memory = action.payload.vm.get('memory').get('guaranteed')
+  yield put(updateVmMemory(memory))
+
+  const cpu = action.payload.vm.get('cpu').get('vCPUs')
+  yield put(updateVmCpu(cpu))
+  yield put(openVmDialog())
+  yield put(setVmDetailToShow({ vmId: action.payload.vm.get('id') }))
+}
+
+function* showAddNewVm (action) {
+  yield put(setVmDetailToShow({ vmId: '0' }))
+  yield put(updateDialogType('create'))
+  const cluster = Selectors.getFirstCluster()
+  yield put(updateCluster(cluster))
+
+  yield put(openVmDialog())
+  const blankTemplate = Selectors.getTemplateById('00000000-0000-0000-0000-000000000000')
+  yield put(updateTemplate(blankTemplate))
+  yield put(updateVmMemory(blankTemplate.get('memory')))
+  yield put(updateVmCpu(blankTemplate.get('cpu')))
+
+  const os = Selectors.getOperatingSystemByName(blankTemplate.get('os'))
+  yield put(updateOperatingSystem(os))
+
+  yield put(updateVmId('0'))
+  yield put(updateVmName(''))
+}
+
+function* showEditTemplate () {
+  yield put(setVmDetailToShow({ vmId: '0' }))
+}
+
+function* closeDialog () {
+  yield put(closeVmDialog())
+  yield put(closeVmDetail())
+  yield put(closeEditTemplate())
+}
+
 function* fetchConsoleVmMeta ({ vmId }) {
   const consoles = yield callExternalAction('consoles', Api.consoles, { action: 'INTERNAL_CONSOLES', payload: { vmId } })
 
@@ -277,6 +358,7 @@ function* getConsoleVm (action) {
 }
 
 function* selectVmDetail (action) {
+  yield put(openVmDetail())
   yield put(setVmDetailToShow({ vmId: action.payload.vmId }))
   yield fetchSingleVm(getSingleVm({ vmId: action.payload.vmId }))
 }
@@ -295,12 +377,71 @@ function* schedulerPerMinute (action) {
   }
 }
 
+function* createNewVm (action) {
+  yield callExternalAction('addNewVm', Api.addNewVm, action)
+  yield put(getAllVms({ shallowFetch: false }))
+}
+
+function* editVm (action) {
+  yield callExternalAction('editVm', Api.editVm, action)
+  yield put(getAllVms({ shallowFetch: false }))
+}
+
+function* editTemplate (action) {
+  yield callExternalAction('editTemplate', Api.editTemplate, action)
+  yield put(getAllTemplates({ shallowFetch: false }))
+}
+
+function* fetchAllTemplates (action) {
+  const templates = yield callExternalAction('getAllTemplates', Api.getAllTemplates, action)
+
+  if (templates && templates['template']) {
+    const templatesInternal = templates.template.map(template => Api.templateToInternal({ template }))
+    yield put(addTemplates({ templates: templatesInternal }))
+    // update template in store for add vm dialog
+    const activeTemplate = Selectors.getTemplateById('00000000-0000-0000-0000-000000000000')
+    yield put(updateTemplate(activeTemplate))
+    yield put(updateVmMemory(activeTemplate.memory))
+    yield put(updateVmCpu(activeTemplate.cpu))
+    yield put(updateVmName(''))
+    // update template in store for edit template dialog
+    yield put(updateEditTemplate(activeTemplate))
+  }
+}
+
+function* fetchAllClusters (action) {
+  const clusters = yield callExternalAction('getAllClusters', Api.getAllClusters, action)
+
+  if (clusters && clusters['cluster']) {
+    const clustersInternal = clusters.cluster.map(cluster => Api.clusterToInternal({ cluster }))
+    yield put(addClusters({ clusters: clustersInternal }))
+    yield put(updateCluster(clustersInternal[0]))
+  }
+}
+
+function* fetchAllOS (action) {
+  const operatingSystems = yield callExternalAction('getAllOperatingSystems', Api.getAllOperatingSystems, action)
+
+  if (operatingSystems && operatingSystems['operating_system']) {
+    const operatingSystemsInternal = operatingSystems.operating_system.map(os => Api.OSToInternal({ os }))
+    yield put(addAllOS({ os: operatingSystemsInternal }))
+    const activeOperatingSystem = operatingSystemsInternal.find(os => os.name === 'other')
+    yield put(updateOperatingSystem(activeOperatingSystem))
+  }
+}
+
 export function *rootSaga () {
   yield [
     takeEvery('LOGIN', login),
     // takeEvery('LOGIN_SUCCESSFUL', onLoginSuccessful),
     takeEvery('LOGOUT', logout),
     takeLatest('GET_ALL_VMS', fetchAllVms),
+    takeLatest('ADD_NEW_VM', createNewVm),
+    takeLatest('EDIT_VM', editVm),
+    takeLatest('EDIT_TEMPLATE', editTemplate),
+    takeLatest('GET_ALL_CLUSTERS', fetchAllClusters),
+    takeLatest('GET_ALL_TEMPLATES', fetchAllTemplates),
+    takeLatest('GET_ALL_OS', fetchAllOS),
     takeLatest('PERSIST_STATE', persistStateSaga),
 
     takeEvery('SHUTDOWN_VM', shutdownVm),
@@ -308,6 +449,10 @@ export function *rootSaga () {
     takeEvery('START_VM', startVm),
     takeEvery('GET_CONSOLE_VM', getConsoleVm),
     takeEvery('SUSPEND_VM', suspendVm),
+    takeEvery('SHOW_EDIT_VM', showEditVm),
+    takeEvery('SHOW_EDIT_TEMPLATE', showEditTemplate),
+    takeEvery('SHOW_BLANK_DIALOG', showAddNewVm),
+    takeEvery('CLOSE_DETAIL', closeDialog),
 
     takeEvery('SELECT_VM_DETAIL', selectVmDetail),
 
