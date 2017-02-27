@@ -431,7 +431,6 @@ function* fetchAllOS (action) {
 }
 
 export function *rootSaga () {
-  console.log('VMS')
   yield [
     takeEvery('LOGIN', login),
     // takeEvery('LOGIN_SUCCESSFUL', onLoginSuccessful),

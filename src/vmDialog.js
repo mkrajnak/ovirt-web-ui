@@ -57,7 +57,9 @@ class vmDialog extends React.Component {
       'template': { 'name': this.template.value },
       'cluster': { 'name': this.cluster.value },
       'memory': this.memory.value,
-      'os': { 'type': this.os.value },
+      'os': {
+        'type': this.os.value,
+      },
       'cpu': {
         'topology': {
           'cores': '1',

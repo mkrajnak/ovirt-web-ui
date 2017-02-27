@@ -35,7 +35,6 @@ class templateDialog extends React.Component {
 
   componentDidUpdate () {
     // without this template combobox its not rerendering
-    $(this.template).selectpicker('refresh')
     $(this.templateOs).selectpicker('refresh')
   }
 
@@ -57,7 +56,7 @@ class templateDialog extends React.Component {
     this.props.changeTemplate(template)
 
     const os = this.getOperatingSystem(template.get('os'))
-    this.props.changeOperatingSystem(os.get('description'))
+    this.props.changeOperatingSystem(os.get('name'))
     this.props.changeMemory(template.get('memory'))
     this.props.changeCpu(template.get('cpu'))
 
@@ -112,11 +111,10 @@ class templateDialog extends React.Component {
           'threads': '1',
         },
       },
-      'os': this.templateOs.value,
+      'os': {
+        'type': this.templateOs.value,
+      },
     }
-    // TODO
-    console.log('One does not simply********************************')
-    console.log(template, this.props.template.get('id'))
     this.props.editTemplate(template, this.props.template.get('id'))
   }
 
@@ -153,7 +151,7 @@ class templateDialog extends React.Component {
             label='Operating System'
             getValue={(input) => { this.templateOs = input }}
             onChange={this.changeOperatingSystem}
-            value={this.getOperatingSystem(this.props.template.get('os')).get('name')}
+            value={this.props.template.get('os')}
             data={this.props.operatingSystems.get('operatingSystems')}
             renderer={(item) => item.get('description')} />
 

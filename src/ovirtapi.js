@@ -47,8 +47,6 @@ OvirtApi = {
       })
   },
   _httpPostJSON ({ url, input }) {
-    console.log('POST JSON')
-    console.log(input)
     return $.ajax(url, {
       type: 'POST',
       headers: {
