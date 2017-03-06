@@ -178,6 +178,15 @@ export function updateCluster (cluster) {
   }
 }
 
+export function changeCluster (cluster) {
+  return {
+    type: 'CHANGE_CLUSTER',
+    payload: {
+      cluster,
+    },
+  }
+}
+
 export function getAllClusters () {
   return {
     type: 'GET_ALL_CLUSTERS',
@@ -206,6 +215,15 @@ export function getAllTemplates ({ shallowFetch = false }) {
 export function updateTemplate (template) {
   return {
     type: 'UPDATE_TEMPLATE',
+    payload: {
+      template,
+    },
+  }
+}
+
+export function changeTemplate (template) {
+  return {
+    type: 'CHANGE_TEMPLATE',
     payload: {
       template,
     },

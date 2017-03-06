@@ -33,7 +33,7 @@ const App = ({ vms, visibility, dialogVisibility }) => {
     <div>
       <VmsPageHeader title='oVirt User Portal' />
       <hr />
-      <AddVmButton name='Add New VM' />
+      <AddVmButton name='Add New Virtual Machine' />
       <EditTemplateButton name='Edit Template' />
       <div className='container-fluid navbar-top-offset'>
         <VmsList />

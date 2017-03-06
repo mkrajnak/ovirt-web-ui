@@ -33,7 +33,9 @@ import {
   addTemplates,
   addAllOS,
   updateCluster,
+  changeCluster,
   updateTemplate,
+  changeTemplate,
   updateOperatingSystem,
   updateVmMemory,
   updateVmCpu,
@@ -301,19 +303,28 @@ function* showAddNewVm (action) {
   yield put(setVmDetailToShow({ vmId: '0' }))
   yield put(updateDialogType('create'))
   const cluster = Selectors.getFirstCluster()
-  yield put(updateCluster(cluster))
-
+  // yield put(updateCluster(cluster))
+  yield put(changeCluster(cluster))
+  yield put(updateVmId('0'))
+  yield put(updateVmName(''))
   yield put(openVmDialog())
+}
+
+function* handleClusterChange (action) {
+  yield put(updateCluster(action.payload.cluster))
+  // After every cluster change, set template to Blank
   const blankTemplate = Selectors.getTemplateById('00000000-0000-0000-0000-000000000000')
-  yield put(updateTemplate(blankTemplate))
-  yield put(updateVmMemory(blankTemplate.get('memory')))
-  yield put(updateVmCpu(blankTemplate.get('cpu')))
+  yield put(changeTemplate(blankTemplate))
 
   const os = Selectors.getOperatingSystemByName(blankTemplate.get('os'))
   yield put(updateOperatingSystem(os))
+}
 
-  yield put(updateVmId('0'))
-  yield put(updateVmName(''))
+function* handleTemplateChange (action) {
+  const template = action.payload.template
+  yield put(updateTemplate(template))
+  yield put(updateVmMemory(template.get('memory')))
+  yield put(updateVmCpu(template.get('cpu')))
 }
 
 function* showEditTemplate () {
@@ -452,6 +463,8 @@ export function *rootSaga () {
     takeEvery('SHOW_EDIT_VM', showEditVm),
     takeEvery('SHOW_EDIT_TEMPLATE', showEditTemplate),
     takeEvery('SHOW_BLANK_DIALOG', showAddNewVm),
+    takeEvery('CHANGE_CLUSTER', handleClusterChange),
+    takeEvery('CHANGE_TEMPLATE', handleTemplateChange),
     takeEvery('CLOSE_DETAIL', closeDialog),
 
     takeEvery('SELECT_VM_DETAIL', selectVmDetail),

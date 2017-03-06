@@ -8,8 +8,8 @@ import DetailContainer from './DetailContainer'
 import {
   addNewVm,
   editVm,
-  updateCluster,
-  updateTemplate,
+  changeCluster,
+  changeTemplate,
   updateOperatingSystem,
   closeDetail,
   updateVmName,
@@ -110,23 +110,11 @@ class vmDialog extends React.Component {
     const cluster = this.props.clusters.get('clusters').toList().find(cluster =>
       cluster.get('name') === this.cluster.value)
     this.props.changeCluster(cluster)
-
-    const template = this.getTemplate('Blank')
-    this.updateTemplateDeps(template)
-  }
-
-  updateTemplateDeps (template) {
-    this.props.changeTemplate(template)
-
-    const os = this.getOperatingSystem(template.get('os'))
-    this.props.changeOperatingSystem(os)
-    this.props.changeVmMemory(template.get('memory'))
-    this.props.changeVmCpu(template.get('cpu'))
   }
 
   changeTemplate () {
     const template = this.getTemplate(this.template.value)
-    this.updateTemplateDeps(template)
+    this.props.changeTemplate(template)
   }
 
   changeOperatingSystem () {
@@ -263,11 +251,11 @@ export default connect(
     edit: (vm, vmId) =>
       dispatch(editVm(vm, vmId)),
     changeCluster: (cluster) =>
-      dispatch(updateCluster(cluster)),
+      dispatch(changeCluster(cluster)),
     changeOperatingSystem: (os) =>
       dispatch(updateOperatingSystem(os)),
     changeTemplate: (template) =>
-      dispatch(updateTemplate(template)),
+      dispatch(changeTemplate(template)),
     changeVmName: (name) =>
       dispatch(updateVmName(name)),
     changeVmMemory: (memory) =>
