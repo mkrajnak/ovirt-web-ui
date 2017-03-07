@@ -36,21 +36,6 @@ OvirtApi = {
       type: 'POST',
       headers: {
         'Accept': 'application/json',
-        'Content-Type': 'application/xml',
-        'Authorization': `Bearer ${OvirtApi._getLoginToken()}`,
-      },
-      data: input,
-    }).then(data => Promise.resolve(data))
-      .catch(data => {
-        logDebug(`Ajax failed: ${JSON.stringify(data)}`)
-        return Promise.reject(data)
-      })
-  },
-  _httpPostJSON ({ url, input }) {
-    return $.ajax(url, {
-      type: 'POST',
-      headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${OvirtApi._getLoginToken()}`,
         'Filter': 'true',
@@ -269,7 +254,7 @@ OvirtApi = {
   },
   addNewVm ({ vm }) {
     OvirtApi._assertLogin({ methodName: 'addNewVm' })
-    return OvirtApi._httpPostJSON({ url: `/api/vms`, input: JSON.stringify(vm) })
+    return OvirtApi._httpPost({ url: `/api/vms`, input: JSON.stringify(vm) })
   },
   editVm ({ vm, vmId }) {
     OvirtApi._assertLogin({ methodName: 'editVm' })
@@ -281,19 +266,19 @@ OvirtApi = {
   },
   shutdown ({ vmId }) {
     OvirtApi._assertLogin({ methodName: 'shutdown' })
-    return OvirtApi._httpPost({ url: `${AppConfiguration.applicationContext}/api/vms/${vmId}/shutdown`, input: '<action />' })
+    return OvirtApi._httpPost({ url: `${AppConfiguration.applicationContext}/api/vms/${vmId}/shutdown`, input: '{}' })
   },
   start ({ vmId }) {
     OvirtApi._assertLogin({ methodName: 'start' })
-    return OvirtApi._httpPost({ url: `${AppConfiguration.applicationContext}/api/vms/${vmId}/start`, input: '<action />' })
+    return OvirtApi._httpPost({ url: `${AppConfiguration.applicationContext}/api/vms/${vmId}/start`, input: '{}' })
   },
   suspend ({ vmId }) {
-    OvirtApi._assertLogin({ methodName: 'start' })
-    return OvirtApi._httpPost({ url: `${AppConfiguration.applicationContext}/api/vms/${vmId}/suspend`, input: '<action />' })
+    OvirtApi._assertLogin({ methodName: 'suspend' })
+    return OvirtApi._httpPost({ url: `${AppConfiguration.applicationContext}/api/vms/${vmId}/suspend`, input: '{}' })
   },
   restart ({ vmId }) {
     OvirtApi._assertLogin({ methodName: 'restart' })
-    return OvirtApi._httpPost({ url: `${AppConfiguration.applicationContext}/api/vms/${vmId}/reboot`, input: '<action />' })
+    return OvirtApi._httpPost({ url: `${AppConfiguration.applicationContext}/api/vms/${vmId}/reboot`, input: '{}' })
   },
   icon ({ id }) {
     OvirtApi._assertLogin({ methodName: 'icon' })

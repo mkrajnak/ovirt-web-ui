@@ -315,9 +315,6 @@ function* handleClusterChange (action) {
   // After every cluster change, set template to Blank
   const blankTemplate = Selectors.getTemplateById('00000000-0000-0000-0000-000000000000')
   yield put(changeTemplate(blankTemplate))
-
-  const os = Selectors.getOperatingSystemByName(blankTemplate.get('os'))
-  yield put(updateOperatingSystem(os))
 }
 
 function* handleTemplateChange (action) {
@@ -325,6 +322,9 @@ function* handleTemplateChange (action) {
   yield put(updateTemplate(template))
   yield put(updateVmMemory(template.get('memory')))
   yield put(updateVmCpu(template.get('cpu')))
+
+  const os = Selectors.getOperatingSystemByName(template.get('os'))
+  yield put(updateOperatingSystem(os))
 }
 
 function* showEditTemplate () {
