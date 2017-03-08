@@ -1,7 +1,7 @@
 import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
 
-const LabeledTextField = ({ id, label, setValue, placeholder = label, getValue, value, type = 'text' }) => (
+const LabeledTextField = ({ id, label, setValue, placeholder = label, getValue, value, type = 'text', disabled = false }) => (
   <div className='form-group'>
     <label className='col-sm-2 control-label' htmlFor={id} >
       {label}
@@ -13,7 +13,8 @@ const LabeledTextField = ({ id, label, setValue, placeholder = label, getValue, 
         placeholder={placeholder}
         ref={getValue}
         onChange={setValue}
-        value={value} />
+        value={value}
+        disabled={disabled} />
     </div>
   </div>
 )
@@ -30,6 +31,7 @@ LabeledTextField.propTypes = {
     PropTypes.string,
     PropTypes.number,
   ]),
+  disabled: PropTypes.bool,
 }
 
 export default connect()(LabeledTextField)

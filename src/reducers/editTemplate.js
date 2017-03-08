@@ -10,7 +10,7 @@ const editTemplateReducer = actionReducer(Immutable.fromJS({ id: '', cluster: ''
     return state.set('name', imUpdates)
   },
   UPDATE_EDIT_TEMPLATE_OS (state, { payload: { os } }) {
-    const imUpdates = Immutable.fromJS(name)
+    const imUpdates = Immutable.fromJS(os)
     return state.set('os', imUpdates)
   },
   UPDATE_EDIT_TEMPLATE_DESCRIPTION (state, { payload: { description } }) {

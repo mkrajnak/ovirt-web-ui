@@ -43,6 +43,7 @@ OvirtApi = {
       data: input,
     }).then(data => Promise.resolve(data))
       .catch(data => {
+        logDebug(`Ajax failed: ${JSON.stringify(data)}`)
         return Promise.reject(data)
       })
   },
@@ -57,6 +58,7 @@ OvirtApi = {
       data: input,
     }).then(data => Promise.resolve(data))
       .catch(data => {
+        logDebug(`Ajax failed: ${JSON.stringify(data)}`)
         return Promise.reject(data)
       })
   },
@@ -155,7 +157,6 @@ OvirtApi = {
       format: disk['format'],
     }
   },
-
   templateToInternal ({ template }) {
     if (template.cluster) {
       return {
@@ -165,6 +166,7 @@ OvirtApi = {
         cluster: template.cluster.id,
         memory: template.memory,
         cpu: template.cpu.topology.sockets,
+        version_number: template.version.version_number,
         os: template.os.type,
       }
     }
@@ -175,17 +177,16 @@ OvirtApi = {
       cluster: '0',
       memory: template.memory,
       cpu: template.cpu.topology.sockets,
+      version_number: template.version.version_number,
       os: template.os.type,
     }
   },
-
   clusterToInternal ({ cluster }) {
     return {
       id: cluster.id,
       name: cluster.name,
     }
   },
-
   OSToInternal ({ os }) {
     return {
       id: os.id,
@@ -193,7 +194,6 @@ OvirtApi = {
       description: os.description,
     }
   },
-
   iconToInternal ({ icon }) {
     return {
       id: icon.id,

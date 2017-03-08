@@ -230,6 +230,15 @@ export function changeTemplate (template) {
   }
 }
 
+export function changeEditTemplate (template) {
+  return {
+    type: 'CHANGE_EDIT_TEMPLATE',
+    payload: {
+      template,
+    },
+  }
+}
+
 export function updateEditTemplate (template) {
   return {
     type: 'UPDATE_EDIT_TEMPLATE',
@@ -248,7 +257,7 @@ export function updateEditTemplateName (name) {
   }
 }
 
-export function updateEditTemplateOs (os) {
+export function updateEditTemplateOS (os) {
   return {
     type: 'UPDATE_EDIT_TEMPLATE_OS',
     payload: {

@@ -42,6 +42,11 @@ import {
   updateVmName,
   updateDialogType,
   updateVmId,
+  updateEditTemplateName,
+  updateEditTemplateDescription,
+  updateEditTemplateOS,
+  updateEditTemplateMemory,
+  updateEditTemplateCpu,
   openVmDialog,
   closeVmDialog,
   openVmDetail,
@@ -303,7 +308,6 @@ function* showAddNewVm (action) {
   yield put(setVmDetailToShow({ vmId: '0' }))
   yield put(updateDialogType('create'))
   const cluster = Selectors.getFirstCluster()
-  // yield put(updateCluster(cluster))
   yield put(changeCluster(cluster))
   yield put(updateVmId('0'))
   yield put(updateVmName(''))
@@ -325,6 +329,16 @@ function* handleTemplateChange (action) {
 
   const os = Selectors.getOperatingSystemByName(template.get('os'))
   yield put(updateOperatingSystem(os))
+}
+
+function* handleEditTemplateChange (action) {
+  const template = action.payload.template
+  yield put(updateEditTemplate(template))
+  yield put(updateEditTemplateName(template.get('name')))
+  yield put(updateEditTemplateMemory(template.get('memory')))
+  yield put(updateEditTemplateCpu(template.get('cpu')))
+  yield put(updateEditTemplateDescription(template.get('description')))
+  yield put(updateEditTemplateOS(template.get('os')))
 }
 
 function* showEditTemplate () {
@@ -400,7 +414,6 @@ function* editVm (action) {
 
 function* editTemplate (action) {
   yield callExternalAction('editTemplate', Api.editTemplate, action)
-  yield put(getAllTemplates({ shallowFetch: false }))
 }
 
 function* fetchAllTemplates (action) {
@@ -465,6 +478,7 @@ export function *rootSaga () {
     takeEvery('SHOW_BLANK_DIALOG', showAddNewVm),
     takeEvery('CHANGE_CLUSTER', handleClusterChange),
     takeEvery('CHANGE_TEMPLATE', handleTemplateChange),
+    takeEvery('CHANGE_EDIT_TEMPLATE', handleEditTemplateChange),
     takeEvery('CLOSE_DETAIL', closeDialog),
 
     takeEvery('SELECT_VM_DETAIL', selectVmDetail),

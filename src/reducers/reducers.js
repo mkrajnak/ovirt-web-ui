@@ -8,12 +8,12 @@ import {
   VisibilityReducer as visibility,
 } from 'ovirt-ui-components'
 
-import templates from './templateReducer'
-import clusters from './clustersReducer'
-import operatingSystems from './OSReducer'
+import templates from './templates'
+import clusters from './clusters'
+import operatingSystems from './OperatingSystems'
 import dialogVisibility from './dialogVisibility'
-import vmDialog from './vmDialogReducer'
-import editTemplate from './editTemplateReducer'
+import vmDialog from './vmDialog'
+import editTemplate from './editTemplate'
 
 function router (redirectUrl = '/', action) {
   switch (action.type) {

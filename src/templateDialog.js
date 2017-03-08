@@ -8,10 +8,10 @@ import DetailContainer from './DetailContainer'
 import {
   updateEditTemplateName,
   updateEditTemplateDescription,
-  updateEditTemplate,
-  updateEditTemplateOs,
+  updateEditTemplateOS,
   updateEditTemplateMemory,
   updateEditTemplateCpu,
+  changeEditTemplate,
   editTemplate,
   closeDetail,
 } from './actions'
@@ -20,7 +20,6 @@ class templateDialog extends React.Component {
   constructor (props) {
     super(props)
     this.changeTemplate = this.changeTemplate.bind(this)
-    this.updateTemplateDeps = this.updateTemplateDeps.bind(this)
     this.changeOperatingSystem = this.changeOperatingSystem.bind(this)
     this.changeMemory = this.changeMemory.bind(this)
     this.changeCpu = this.changeCpu.bind(this)
@@ -28,7 +27,6 @@ class templateDialog extends React.Component {
     this.changeDescription = this.changeDescription.bind(this)
     this.editTemplate = this.editTemplate.bind(this)
     this.closeDialog = this.closeDialog.bind(this)
-    // TODO use the selectors
     this.getTemplate = this.getTemplate.bind(this)
     this.getOperatingSystem = this.getOperatingSystem.bind(this)
   }
@@ -49,22 +47,7 @@ class templateDialog extends React.Component {
 
   getOperatingSystem (name) {
     return this.props.operatingSystems.get('operatingSystems').toList().find(os =>
-      os.get('name') === name || os.get('description') === name)
-  }
-
-  updateTemplateDeps (template) {
-    this.props.changeTemplate(template)
-
-    const os = this.getOperatingSystem(template.get('os'))
-    this.props.changeOperatingSystem(os.get('name'))
-    this.props.changeMemory(template.get('memory'))
-    this.props.changeCpu(template.get('cpu'))
-
-    if (template.get('description')) {
-      this.props.changeDescription(template.get('description'))
-    } else {
-      this.props.changeDescription('')
-    }
+      os.get('description') === name)
   }
 
   getTemplate (name) {
@@ -74,7 +57,7 @@ class templateDialog extends React.Component {
 
   changeTemplate () {
     const template = this.getTemplate(this.template.value)
-    this.updateTemplateDeps(template)
+    this.props.changeTemplate(template)
   }
 
   changeOperatingSystem () {
@@ -137,7 +120,8 @@ class templateDialog extends React.Component {
             id='templateName'
             placeholder='Template name'
             value={this.props.template.get('name')}
-            setValue={this.changeName} />
+            setValue={this.changeName}
+            disabled={this.props.template.get('version_number') !== '1'} />
 
           <LabeledTextField
             label='Description'
@@ -211,9 +195,9 @@ export default connect(
     changeDescription: (description) =>
       dispatch(updateEditTemplateDescription(description)),
     changeTemplate: (template) =>
-      dispatch(updateEditTemplate(template)),
+      dispatch(changeEditTemplate(template)),
     changeOperatingSystem: (template) =>
-      dispatch(updateEditTemplateOs(template)),
+      dispatch(updateEditTemplateOS(template)),
     changeMemory: (template) =>
       dispatch(updateEditTemplateMemory(template)),
     changeCpu: (template) =>
