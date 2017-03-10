@@ -54,6 +54,7 @@ import {
   updateEditTemplate,
   closeEditTemplate,
   closeDetail,
+  updateErrorMessage,
 } from './actions'
 
 import Api from './ovirtapi'
@@ -347,6 +348,7 @@ function* showEditTemplate () {
 }
 
 function* closeDialog () {
+  yield put(updateErrorMessage(''))
   yield put(closeVmDialog())
   yield put(closeVmDetail())
   yield put(closeEditTemplate())
@@ -404,19 +406,39 @@ function* schedulerPerMinute (action) {
 }
 
 function* createNewVm (action) {
-  yield callExternalAction('addNewVm', Api.addNewVm, action)
-  yield put(getAllVms({ shallowFetch: false }))
-  yield put(closeDetail())
+  yield put(updateErrorMessage(''))
+  const result = yield callExternalAction('addNewVm', Api.addNewVm, action)
+  if (result.error) {
+    const msg = (result.error.responseJSON && result.error.responseJSON.detail) || ''
+    yield put(updateErrorMessage(msg))
+  } else {
+    yield put(closeDetail())
+    yield put(getAllVms({ shallowFetch: false }))
+  }
 }
 
 function* editVm (action) {
-  yield callExternalAction('editVm', Api.editVm, action)
-  yield put(getAllVms({ shallowFetch: false }))
-  yield put(closeDetail())
+  yield put(updateErrorMessage(''))
+  const result = yield callExternalAction('editVm', Api.editVm, action)
+  if (result.error) {
+    const msg = (result.error.responseJSON && result.error.responseJSON.detail) || ''
+    yield put(updateErrorMessage(msg))
+  } else {
+    yield put(closeDetail())
+    yield put(getAllVms({ shallowFetch: false }))
+  }
 }
 
 function* editTemplate (action) {
-  yield callExternalAction('editTemplate', Api.editTemplate, action)
+  yield put(updateErrorMessage(''))
+  const result = yield callExternalAction('editTemplate', Api.editTemplate, action)
+  if (result.error) {
+    const msg = (result.error.responseJSON && result.error.responseJSON.detail) || ''
+    yield put(updateErrorMessage(msg))
+  } else {
+    yield put(closeDetail())
+    yield put(getAllVms({ shallowFetch: false }))
+  }
 }
 
 function* fetchAllTemplates (action) {

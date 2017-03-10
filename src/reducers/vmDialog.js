@@ -1,7 +1,17 @@
 import Immutable from 'immutable'
 import { actionReducer } from './utils'
 
-const vmDialogReducer = actionReducer(Immutable.fromJS({ type: {}, vmId: {}, cluster: {}, template: {}, os: {}, name: {}, memory: {}, cpu: {} }), {
+const vmDialogReducer = actionReducer(Immutable.fromJS({
+  type: {},
+  vmId: {},
+  cluster: {},
+  template: {},
+  os: {},
+  name: {},
+  memory: {},
+  cpu: {},
+  errorMessage: '',
+}), {
   UPDATE_CLUSTER (state, { payload: { cluster } }) {
     const imUpdates = Immutable.fromJS(cluster)
     return state.set('cluster', imUpdates)
@@ -33,6 +43,10 @@ const vmDialogReducer = actionReducer(Immutable.fromJS({ type: {}, vmId: {}, clu
   UPDATE_VM_ID (state, { payload: { vmId } }) {
     const imUpdates = Immutable.fromJS(vmId)
     return state.set('vmId', imUpdates)
+  },
+  UPDATE_ERROR_MESSAGE (state, { payload: { message } }) {
+    const imUpdates = Immutable.fromJS(message)
+    return state.set('errorMessage', imUpdates)
   },
 })
 

@@ -5,6 +5,7 @@ import $ from 'jquery'
 import LabeledSelect from './labeledSelect'
 import LabeledTextField from './labeledTextField'
 import DetailContainer from './DetailContainer'
+import ErrorAlert from './errorAlert'
 import {
   addNewVm,
   editVm,
@@ -139,6 +140,7 @@ class vmDialog extends React.Component {
       <DetailContainer>
         <h1>{this.props.type === 'edit' ? 'Edit VM' : 'Create new VM'}</h1>
         <hr />
+        <ErrorAlert message={this.props.errorMessage} />
         <form className='form-horizontal'>
           <LabeledSelect
             label='Cluster'
@@ -234,6 +236,7 @@ vmDialog.propTypes = {
   closeDialog: PropTypes.func.isRequired,
   addVm: PropTypes.func.isRequired,
   edit: PropTypes.func.isRequired,
+  errorMessage: PropTypes.string,
 }
 
 export default connect(
@@ -250,6 +253,7 @@ export default connect(
     heading: state.vmDialog.get('dialogName'),
     vmName: state.vmDialog.get('name'),
     vmId: state.vmDialog.get('vmId'),
+    errorMessage: state.vmDialog.get('errorMessage'),
   }),
   (dispatch) => ({
     addVm: (vm) =>

@@ -1,3 +1,12 @@
+export function updateErrorMessage (message) {
+  return {
+    type: 'UPDATE_ERROR_MESSAGE',
+    payload: {
+      message,
+    },
+  }
+}
+
 export function blankAddNewVm () {
   return {
     type: 'SHOW_BLANK_DIALOG',
