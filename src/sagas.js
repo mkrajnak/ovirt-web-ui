@@ -58,7 +58,7 @@ import {
   updateEditTemplateErrorMessage,
 } from './actions'
 
-import Api from './ovirtapi'
+import Api from './manageIQapi'
 import { persistStateToLocalStorage } from './storage'
 import Selectors from './selectors'
 import AppConfiguration from './config'
@@ -114,7 +114,6 @@ function* login (action) {
     // persistTokenToSessionStorage({ token, username })
 
     yield put(loginSuccessful({ token, username }))
-    yield put(getAllVms({ shallowFetch: false }))
     yield put(getAllClusters()) // no shallow
     yield put(getAllOperatingSystems())
     yield put(getAllTemplates({ shallowFetch: false }))
@@ -462,6 +461,8 @@ function* fetchAllTemplates (action) {
 
 function* fetchAllClusters (action) {
   const clusters = yield callExternalAction('getAllClusters', Api.getAllClusters, action)
+  logDebug('wow')
+  logDebug(JSON.stringify(clusters))
 
   if (clusters && clusters['cluster']) {
     const clustersInternal = clusters.cluster.map(cluster => Api.clusterToInternal({ cluster }))

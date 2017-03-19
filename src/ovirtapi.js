@@ -171,27 +171,15 @@ OvirtApi = {
     }
   },
   templateToInternal ({ template }) {
-    if (template.cluster) {
-      return {
-        id: template.id,
-        name: template.name,
-        description: template.description,
-        cluster: template.cluster.id,
-        memory: OvirtApi._getVmMemory(template.memory),
-        cpu: template.cpu.topology.sockets,
-        version_number: template.version.version_number,
-        os: template.os.type,
-      }
-    }
     return {
       id: template.id,
       name: template.name,
       description: template.description,
-      cluster: '0',
+      cluster: template.cluster ? template.cluster.id : '0',
       memory: OvirtApi._getVmMemory(template.memory),
       cpu: template.cpu.topology.sockets,
-      version_number: template.version.version_number,
       os: template.os.type,
+      version_number: template.version.version_number,
     }
   },
   clusterToInternal ({ cluster }) {
