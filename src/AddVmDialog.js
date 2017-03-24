@@ -36,15 +36,18 @@ class vmDialog extends React.Component {
 
   componentDidUpdate () {
     // without this template combobox its not rerendering
-    $(this.template).selectpicker('refresh')
-    $(this.cluster).selectpicker('refresh')
-    $(this.os).selectpicker('refresh')
+    $(this.cluster).combobox('refresh')
+    $(this.template).combobox('refresh')
+    $(this.os).combobox('refresh')
   }
 
   componentDidMount () {
-    $(this.template).selectpicker()
-    $(this.cluster).selectpicker()
-    $(this.os).selectpicker()
+    $(this.cluster).combobox()
+    $("input[type='text'].combobox").on('change', () => $(this.changeCluster))
+    $(this.template).combobox()
+    $("input[type='text'].combobox").on('change', () => $(this.changeTemplate))
+    $(this.os).combobox()
+    $("input[type='text'].combobox").on('change', () => $(this.changeOperatingSystem))
   }
 
   submitHandler (e) {
@@ -102,7 +105,11 @@ class vmDialog extends React.Component {
   }
 
   changeCluster () {
-    this.props.changeCluster(Selectors.getClusterByName(this.cluster.value))
+    if (this.cluster.value === '') {
+      $(this.cluster).combobox()
+    } else {
+      this.props.changeCluster(Selectors.getClusterByName(this.cluster.value))
+    }
   }
 
   changeTemplate () {
@@ -133,7 +140,9 @@ class vmDialog extends React.Component {
         <ErrorAlert message={this.props.errorMessage} />
         <form className='form-horizontal'>
           <LabeledSelect
+            id='clusterSelect'
             label='Cluster'
+            selectClass='combobox form-control'
             getValue={(input) => { this.cluster = input }}
             onChange={this.changeCluster}
             value={this.props.cluster.get('name')}
@@ -142,7 +151,9 @@ class vmDialog extends React.Component {
             )} />
 
           <LabeledSelect
+            id='templateSelect'
             label='Template'
+            selectClass='combobox form-control'
             getValue={(input) => { this.template = input }}
             onChange={this.changeTemplate}
             value={this.props.template.get('name')}
@@ -151,7 +162,9 @@ class vmDialog extends React.Component {
               ).sort((a, b) => a.get('name').localeCompare(b.get('name')))} />
 
           <LabeledSelect
+            id='operatingSystemSelect'
             label='Operating System'
+            selectClass='combobox form-control'
             getValue={(input) => { this.os = input }}
             onChange={this.changeOperatingSystem}
             value={this.props.os.get('name')}

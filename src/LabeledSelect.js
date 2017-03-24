@@ -2,7 +2,6 @@ import React, { PropTypes } from 'react'
 import { connect } from 'react-redux'
 
 // use 'combobox form-control' class for patternfly combobox
-
 const LabeledSelect = ({
   selectClass = 'selectpicker',
   data,
