@@ -165,16 +165,6 @@ class vmDialog extends React.Component {
                 template.get('cluster') === this.props.cluster.get('id') || template.get('cluster') === '0')
               ).sort((a, b) => a.get('name').localeCompare(b.get('name')))} />
 
-          <LabeledSelect
-            label='Operating System'
-            getValue={(input) => { this.os = input }}
-            onChange={this.changeOperatingSystem}
-            value={this.props.os.get('name')}
-            data={this.props.operatingSystems.get('operatingSystems').toList().sort((a, b) =>
-              a.get('name').localeCompare(b.get('name'))
-            )}
-            renderer={(item) => item.get('description')} />
-
           <LabeledTextField
             selectClass='combobox form-control'
             getValue={(input) => { this.name = input }}
@@ -221,7 +211,7 @@ vmDialog.propTypes = {
   templates: PropTypes.object.isRequired,
   template: PropTypes.object.isRequired,
   operatingSystems: PropTypes.object.isRequired,
-  os: PropTypes.object.isRequired,
+  // os: PropTypes.object.isRequired,
   cpu: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
@@ -252,7 +242,7 @@ export default connect(
     type: state.vmDialog.get('type'),
     cluster: state.vmDialog.get('cluster'),
     template: state.vmDialog.get('template'),
-    os: state.vmDialog.get('os'),
+    // os: state.vmDialog.get('os'),
     memory: state.vmDialog.get('memory'),
     cpu: state.vmDialog.get('cpu'),
     heading: state.vmDialog.get('dialogName'),

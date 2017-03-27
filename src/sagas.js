@@ -1,4 +1,4 @@
-import { call, put } from 'redux-saga/effects'
+import { call, put, fork } from 'redux-saga/effects'
 import { takeEvery, takeLatest } from 'redux-saga'
 
 // import { browserHistory } from 'react-router'
@@ -13,25 +13,18 @@ import {
   failedExternalAction,
   loadInProgress,
   setVmDetailToShow,
-  updateIcons,
-  setVmDisks,
-  updateVms,
-  removeVms,
   vmActionInProgress,
   setVmConsoles,
-  removeMissingVms,
+  updateVms,
 } from 'ovirt-ui-components'
 
 // import store from './store'
 import {
-  persistState,
   getSingleVm,
   getAllTemplates,
   getAllClusters,
-  getAllOperatingSystems,
   addClusters,
   addTemplates,
-  addAllOS,
   updateCluster,
   changeCluster,
   updateTemplate,
@@ -42,35 +35,18 @@ import {
   updateVmName,
   updateDialogType,
   updateVmId,
-  updateEditTemplateName,
-  updateEditTemplateDescription,
-  updateEditTemplateOS,
-  updateEditTemplateMemory,
-  updateEditTemplateCpu,
   openVmDialog,
   closeVmDialog,
   openVmDetail,
   closeVmDetail,
   updateEditTemplate,
-  closeEditTemplate,
   closeDetail,
   updateVmDialogErrorMessage,
-  updateEditTemplateErrorMessage,
 } from './actions'
 
 import Api from './manageIQapi'
-import { persistStateToLocalStorage } from './storage'
 import Selectors from './selectors'
 import AppConfiguration from './config'
-
-function * foreach (array, fn, context) {
-  var i = 0
-  var length = array.length
-
-  for (;i < length; i++) {
-    yield * fn.call(context, array[i], i, array)
-  }
-}
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -88,10 +64,6 @@ function* callExternalAction (methodName, method, action, canBeMissing = false) 
     }
     return { error: e }
   }
-}
-
-function* persistStateSaga () {
-  yield persistStateToLocalStorage({ icons: Selectors.getAllIcons().toJS() })
 }
 
 // TODO: implement 'renew the token'
@@ -115,7 +87,6 @@ function* login (action) {
 
     yield put(loginSuccessful({ token, username }))
     yield put(getAllClusters()) // no shallow
-    yield put(getAllOperatingSystems())
     yield put(getAllTemplates({ shallowFetch: false }))
   } else {
     yield put(loginFailed({
@@ -125,118 +96,9 @@ function* login (action) {
     yield put(yield put(loadInProgress({ value: false })))
   }
 }
-/*
-function* onLoginSuccessful () {
-  const redirectUrl = store.getState().router
-  browserHistory.replace(redirectUrl)
-}
-*/
 
 function* logout () {
   window.location.href = `${AppConfiguration.applicationURL}/sso/logout`
-//  clearTokenFromSessionStorage()
-//  browserHistory.replace('/login')
-}
-
-function* fetchUnknwonIconsForVms ({ vms }) {
-  // unique iconIds from all vms
-  const vmIconIds = new Set(vms.map(vm => vm.icons.small.id))
-  vms.map(vm => vm.icons.large.id).forEach(id => vmIconIds.add(id))
-
-  // reduce to just unknown
-  const allKnownIcons = Selectors.getAllIcons()
-  const iconIds = [...vmIconIds].filter(id => !allKnownIcons.get(id))
-
-  yield * foreach(iconIds, function* (iconId) {
-    yield fetchIcon({ iconId })
-  })
-}
-
-function* fetchIcon ({ iconId }) {
-  if (iconId) {
-    const icon = yield callExternalAction('icon', Api.icon, { payload: { id: iconId } })
-    if (icon['media_type'] && icon['data']) {
-      yield put(updateIcons({ icons: [Api.iconToInternal({ icon })] }))
-    }
-  }
-}
-
-function* fetchAllVms (action) {
-  const { shallowFetch } = action.payload
-
-  // TODO: paging: split this call to a loop per up to 25 vms
-  const allVms = yield callExternalAction('getAllVms', Api.getAllVms, action)
-
-  if (allVms && allVms['vm']) { // array
-    const internalVms = allVms.vm.map(vm => Api.vmToInternal({ vm }))
-
-    const vmIdsToPreserve = internalVms.map(vm => vm.id)
-    yield put(removeMissingVms({ vmIdsToPreserve }))
-
-    yield put(updateVms({ vms: internalVms, copySubResources: true }))
-
-    // TODO: is removing of icons needed? I.e. when icon is removed or changed on the server
-    yield fetchUnknwonIconsForVms({ vms: internalVms })
-
-    if (!shallowFetch) {
-      yield fetchConsoleMetadatas({ vms: internalVms })
-      yield fetchDisks({ vms: internalVms })
-    } else {
-      logDebug('fetchAllVms() shallow fetch requested - skipping other resources')
-    }
-  }
-
-  yield put(loadInProgress({ value: false }))
-  yield put(persistState())
-}
-
-function* fetchDisks ({ vms }) {
-  yield * foreach(vms, function* (vm) {
-    const vmId = vm.id
-    const disks = yield fetchVmDisks({ vmId })
-    if (disks && disks.length > 0) {
-      yield put(setVmDisks({ vmId, disks }))
-    }
-  })
-}
-
-function* fetchConsoleMetadatas ({ vms }) {
-  yield * foreach(vms, function* (vm) {
-    const consolesInternal = yield fetchConsoleVmMeta({ vmId: vm.id })
-    yield put(setVmConsoles({ vmId: vm.id, consoles: consolesInternal }))
-  })
-}
-
-function* fetchSingleVm (action) {
-  const vm = yield callExternalAction('getVm', Api.getVm, action, true)
-
-  if (vm && vm.id) {
-    const internalVm = Api.vmToInternal({ vm })
-
-    internalVm.disks = yield fetchVmDisks({ vmId: internalVm.id })
-    internalVm.consoles = yield fetchConsoleVmMeta({ vmId: internalVm.id })
-
-    yield put(updateVms({ vms: [internalVm] }))
-  } else {
-    if (vm && vm.error && vm.error.status === 404) {
-      yield put(removeVms({ vmIds: [action.payload.vmId] }))
-    }
-  }
-}
-
-function* fetchVmDisks ({ vmId }) {
-  const diskattachments = yield callExternalAction('diskattachments', Api.diskattachments, { payload: { vmId } })
-
-  if (diskattachments && diskattachments['disk_attachment']) { // array
-    const internalDisks = []
-    yield * foreach(diskattachments['disk_attachment'], function* (attachment) {
-      const diskId = attachment.disk.id
-      const disk = yield callExternalAction('disk', Api.disk, { payload: { diskId } })
-      internalDisks.push(Api.diskToInternal({ disk, attachment }))
-    })
-    return internalDisks
-  }
-  return []
 }
 
 function* startProgress ({ vmId, name }) {
@@ -281,31 +143,6 @@ function* startVm (action) {
   yield stopProgress({ vmId: action.payload.vmId, name: 'start', result })
 }
 
-function* showEditVm (action) {
-  yield put(updateDialogType('edit'))
-  const cluster = Selectors.getClusterById(action.payload.vm.get('cluster').get('id'))
-  yield put(updateCluster(cluster))
-
-  const template = Selectors.getTemplateById(action.payload.vm.get('template').get('id'))
-  yield put(updateTemplate(template))
-
-  yield put(updateVmId(action.payload.vm.get('id')))
-
-  const os = Selectors.getOperatingSystemByName(action.payload.vm.get('os').get('type'))
-  yield put(updateOperatingSystem(os))
-
-  const name = action.payload.vm.get('name')
-  yield put(updateVmName(name))
-
-  const memory = action.payload.vm.get('memory').get('total')
-  yield put(updateVmMemory(memory))
-
-  const cpu = action.payload.vm.get('cpu').get('vCPUs')
-  yield put(updateVmCpu(cpu))
-  yield put(openVmDialog())
-  yield put(setVmDetailToShow({ vmId: action.payload.vm.get('id') }))
-}
-
 function* showAddNewVm (action) {
   yield put(setVmDetailToShow({ vmId: '0' }))
   yield put(updateDialogType('create'))
@@ -318,41 +155,21 @@ function* showAddNewVm (action) {
 
 function* handleClusterChange (action) {
   yield put(updateCluster(action.payload.cluster))
-  // After every cluster change, set template to Blank
-  const blankTemplate = Selectors.getTemplateById('00000000-0000-0000-0000-000000000000')
-  yield put(changeTemplate(blankTemplate))
+  yield put(changeTemplate(Selectors.getTemplateById(79)))
 }
 
 function* handleTemplateChange (action) {
   const template = action.payload.template
   yield put(updateTemplate(template))
-  yield put(updateVmMemory(template.get('memory')))
-  yield put(updateVmCpu(template.get('cpu')))
-
-  const os = Selectors.getOperatingSystemByName(template.get('os'))
-  yield put(updateOperatingSystem(os))
-}
-
-function* handleEditTemplateChange (action) {
-  const template = action.payload.template
-  yield put(updateEditTemplate(template))
-  yield put(updateEditTemplateName(template.get('name')))
-  yield put(updateEditTemplateMemory(template.get('memory')))
-  yield put(updateEditTemplateCpu(template.get('cpu')))
-  yield put(updateEditTemplateDescription(template.get('description')))
-  yield put(updateEditTemplateOS(template.get('os')))
-}
-
-function* showEditTemplate () {
-  yield put(setVmDetailToShow({ vmId: '0' }))
+  yield put(updateVmMemory(undefined))
+  yield put(updateVmCpu(undefined))
+  yield put(updateOperatingSystem(undefined))
 }
 
 function* closeDialog () {
   yield put(updateVmDialogErrorMessage(''))
-  yield put(updateEditTemplateErrorMessage(''))
   yield put(closeVmDialog())
   yield put(closeVmDetail())
-  yield put(closeEditTemplate())
 }
 
 function* fetchConsoleVmMeta ({ vmId }) {
@@ -389,7 +206,6 @@ function* getConsoleVm (action) {
 function* selectVmDetail (action) {
   yield put(openVmDetail())
   yield put(setVmDetailToShow({ vmId: action.payload.vmId }))
-  yield fetchSingleVm(getSingleVm({ vmId: action.payload.vmId }))
 }
 
 function* schedulerPerMinute (action) {
@@ -418,39 +234,26 @@ function* createNewVm (action) {
   }
 }
 
-function* editVm (action) {
-  yield put(updateVmDialogErrorMessage(''))
-  const result = yield callExternalAction('editVm', Api.editVm, action)
-  if (result.error) {
-    let msg = (result.error.responseJSON && result.error.responseJSON.detail) || ''
-    yield put(updateVmDialogErrorMessage(msg.replace(/^\[|\]$/mg, '')))
-  } else {
-    yield put(closeDetail())
-    yield put(getAllVms({ shallowFetch: false }))
-  }
-}
-
-function* editTemplate (action) {
-  yield put(updateEditTemplateErrorMessage(''))
-  const result = yield callExternalAction('editTemplate', Api.editTemplate, action)
-  if (result.error) {
-    let msg = (result.error.responseJSON && result.error.responseJSON.detail) || ''
-    yield put(updateEditTemplateErrorMessage(msg.replace(/^\[|\]$/mg, '')))
-  } else {
-    yield put(closeDetail())
-    yield put(getAllVms({ shallowFetch: false }))
+function* fetchTemplate (url) {
+  const template = yield callExternalAction('getTemplate', Api.getTemplate, { payload: { url } })
+  if (template && template.vendor === 'redhat') {
+    const templateInternal = Api.templateToInternal({ template })
+    yield put(addTemplates({ templates: [ templateInternal ] }))
+    if (templateInternal.id === 79) {
+      yield put(updateTemplate(templateInternal))
+    }
   }
 }
 
 function* fetchAllTemplates (action) {
   const templates = yield callExternalAction('getAllTemplates', Api.getAllTemplates, action)
+  if (templates && templates.resources) {
+    yield templates.resources.map(template => fork(fetchTemplate, template.href))
+  }
 
   if (templates && templates['template']) {
-    const templatesInternal = templates.template.map(template => Api.templateToInternal({ template }))
-    yield put(addTemplates({ templates: templatesInternal }))
     // update template in store for add vm dialog
     const activeTemplate = Selectors.getTemplateById('00000000-0000-0000-0000-000000000000')
-    yield put(updateTemplate(activeTemplate))
     yield put(updateVmMemory(activeTemplate.memory))
     yield put(updateVmCpu(activeTemplate.cpu))
     yield put(updateVmName(''))
@@ -459,26 +262,36 @@ function* fetchAllTemplates (action) {
   }
 }
 
-function* fetchAllClusters (action) {
-  const clusters = yield callExternalAction('getAllClusters', Api.getAllClusters, action)
-  logDebug('wow')
-  logDebug(JSON.stringify(clusters))
-
-  if (clusters && clusters['cluster']) {
-    const clustersInternal = clusters.cluster.map(cluster => Api.clusterToInternal({ cluster }))
-    yield put(addClusters({ clusters: clustersInternal }))
-    yield put(updateCluster(clustersInternal[0]))
+function* fetchCluster (url) {
+  const cluster = yield callExternalAction('getCluster', Api.getCluster, { payload: { url } })
+  if (cluster) {
+    const clusterInternal = Api.clusterToInternal({ cluster })
+    yield put(addClusters({ clusters: [ clusterInternal ] }))
+    if (clusterInternal.id && clusterInternal.id === 1) {
+      yield put(updateCluster(clusterInternal))
+    }
   }
 }
 
-function* fetchAllOS (action) {
-  const operatingSystems = yield callExternalAction('getAllOperatingSystems', Api.getAllOperatingSystems, action)
+function* fetchAllClusters (action) {
+  const clusters = yield callExternalAction('getAllClusters', Api.getAllClusters, action)
+  if (clusters && clusters.resources) {
+    yield clusters.resources.map(cluster => fork(fetchCluster, cluster.href))
+  }
+}
 
-  if (operatingSystems && operatingSystems['operating_system']) {
-    const operatingSystemsInternal = operatingSystems.operating_system.map(os => Api.OSToInternal({ os }))
-    yield put(addAllOS({ os: operatingSystemsInternal }))
-    const activeOperatingSystem = operatingSystemsInternal.find(os => os.name === 'other')
-    yield put(updateOperatingSystem(activeOperatingSystem))
+function* fetchSingleVm (url) {
+  const vm = yield callExternalAction('getVm', Api.getVm, { payload: { url } })
+  if (vm && vm.vendor === 'redhat') {
+    const vmInternal = Api.vmToInternal({ vm })
+    yield put(updateVms({ vms: [ vmInternal ] }))
+  }
+}
+
+function* fetchAllVms (action) {
+  const allVms = yield callExternalAction('getAllVms', Api.getAllVms, action)
+  if (allVms && allVms.resources) {
+    yield allVms.resources.map(vm => fork(fetchSingleVm, vm.href))
   }
 }
 
@@ -489,24 +302,17 @@ export function *rootSaga () {
     takeEvery('LOGOUT', logout),
     takeLatest('GET_ALL_VMS', fetchAllVms),
     takeLatest('ADD_NEW_VM', createNewVm),
-    takeLatest('EDIT_VM', editVm),
-    takeLatest('EDIT_TEMPLATE', editTemplate),
     takeLatest('GET_ALL_CLUSTERS', fetchAllClusters),
     takeLatest('GET_ALL_TEMPLATES', fetchAllTemplates),
-    takeLatest('GET_ALL_OS', fetchAllOS),
-    takeLatest('PERSIST_STATE', persistStateSaga),
 
     takeEvery('SHUTDOWN_VM', shutdownVm),
     takeEvery('RESTART_VM', restartVm),
     takeEvery('START_VM', startVm),
     takeEvery('GET_CONSOLE_VM', getConsoleVm),
     takeEvery('SUSPEND_VM', suspendVm),
-    takeEvery('SHOW_EDIT_VM', showEditVm),
-    takeEvery('SHOW_EDIT_TEMPLATE', showEditTemplate),
     takeEvery('SHOW_BLANK_DIALOG', showAddNewVm),
     takeEvery('CHANGE_CLUSTER', handleClusterChange),
     takeEvery('CHANGE_TEMPLATE', handleTemplateChange),
-    takeEvery('CHANGE_EDIT_TEMPLATE', handleEditTemplateChange),
     takeEvery('CLOSE_DETAIL', closeDialog),
 
     takeEvery('SELECT_VM_DETAIL', selectVmDetail),
