@@ -17,6 +17,7 @@ import {
   updateVmName,
   updateVmMemory,
   updateVmCpu,
+  updateVmDialogErrorMessage,
 } from './actions'
 
 class vmDialog extends React.Component {
@@ -32,6 +33,7 @@ class vmDialog extends React.Component {
     this.changeVmCpu = this.changeVmCpu.bind(this)
     this.submitHandler = this.submitHandler.bind(this)
     this.getMemory = this.getMemory.bind(this)
+    this.clearErrorMessage = this.clearErrorMessage.bind(this)
   }
 
   componentDidUpdate () {
@@ -105,19 +107,36 @@ class vmDialog extends React.Component {
   }
 
   changeCluster () {
-    if (this.cluster.value === '') {
-      $(this.cluster).combobox()
+    if (!Selectors.getClusterByName(this.cluster.value)) {
+      this.props.setErrorMessage('Invalid Cluster selected')
+    } else if (this.props.cluster.get('name') === this.cluster.value) {
+      this.clearErrorMessage('Cluster')
     } else {
       this.props.changeCluster(Selectors.getClusterByName(this.cluster.value))
+      this.clearErrorMessage('Cluster')
     }
   }
 
   changeTemplate () {
-    this.props.changeTemplate(Selectors.getTemplateByName(this.template.value))
+    if (!Selectors.getTemplateByName(this.template.value)) {
+      this.props.setErrorMessage('Invalid Template selected')
+    } else if (this.props.template.get('name') === this.template.value) {
+      this.clearErrorMessage('Template')
+    } else {
+      this.props.changeTemplate(Selectors.getTemplateByName(this.template.value))
+      this.clearErrorMessage('Template')
+    }
   }
 
   changeOperatingSystem () {
-    this.props.changeOperatingSystem(Selectors.getOperatingSystemByName(this.os.value))
+    if (!Selectors.getOperatingSystemByName(this.os.value)) {
+      this.props.setErrorMessage('Invalid Operating System selected')
+    } else if (this.props.os.get('name') === this.os.value) {
+      this.clearErrorMessage('Operating System')
+    } else {
+      this.props.changeOperatingSystem(Selectors.getOperatingSystemByName(this.os.value))
+      this.clearErrorMessage('Operating System')
+    }
   }
 
   changeVmName () {
@@ -130,6 +149,12 @@ class vmDialog extends React.Component {
 
   changeVmCpu () {
     this.props.changeVmCpu(this.cpus.value)
+  }
+
+  clearErrorMessage (entity) {
+    if (this.props.errorMessage.includes(entity)) {
+      this.props.setErrorMessage('')
+    }
   }
 
   render () {
@@ -238,6 +263,7 @@ vmDialog.propTypes = {
   changeVmMemory: PropTypes.func.isRequired,
   changeVmCpu: PropTypes.func.isRequired,
   closeDialog: PropTypes.func.isRequired,
+  setErrorMessage: PropTypes.func.isRequired,
   addVm: PropTypes.func.isRequired,
   edit: PropTypes.func.isRequired,
   errorMessage: PropTypes.string,
@@ -278,5 +304,7 @@ export default connect(
       dispatch(updateVmCpu(cpu)),
     closeDialog: () =>
       dispatch(closeDetail()),
+    setErrorMessage: (message) =>
+      dispatch(updateVmDialogErrorMessage(message)),
   })
 )(vmDialog)
