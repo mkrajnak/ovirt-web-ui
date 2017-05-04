@@ -4,6 +4,7 @@ import $ from 'jquery'
 
 import LabeledSelect from './LabeledSelect'
 import LabeledTextField from './LabeledTextField'
+import LabeledSwitch from './LabeledSwitch'
 import DetailContainer from './components/DetailContainer'
 import ErrorAlert from './ErrorAlert'
 import Selectors from './selectors'
@@ -15,7 +16,11 @@ import {
   updateOperatingSystem,
   closeDetail,
   updateVmName,
+  updateVmDescription,
+  updateVmComment,
   updateVmMemory,
+  updateVmMemoryMax,
+  updateVmMemoryGuaranteed,
   updateVmCpu,
   updateVmDialogErrorMessage,
 } from './actions'
@@ -29,7 +34,11 @@ class vmDialog extends React.Component {
     this.changeOperatingSystem = this.changeOperatingSystem.bind(this)
     this.closeDialog = this.closeDialog.bind(this)
     this.changeVmName = this.changeVmName.bind(this)
+    this.changeVmDescription = this.changeVmDescription.bind(this)
+    this.changeVmComment = this.changeVmComment.bind(this)
     this.changeVmMemory = this.changeVmMemory.bind(this)
+    this.changeVmMaxMemory = this.changeVmMaxMemory.bind(this)
+    this.changeVmGuaranteedMemory = this.changeVmGuaranteedMemory.bind(this)
     this.changeVmCpu = this.changeVmCpu.bind(this)
     this.submitHandler = this.submitHandler.bind(this)
     this.getMemory = this.getMemory.bind(this)
@@ -50,6 +59,7 @@ class vmDialog extends React.Component {
     $("input[type='text'].combobox").on('change', () => $(this.changeTemplate))
     $(this.os).combobox()
     $("input[type='text'].combobox").on('change', () => $(this.changeOperatingSystem))
+    $(this.memoryBallon).bootstrapSwitch()
   }
 
   submitHandler (e) {
@@ -143,8 +153,24 @@ class vmDialog extends React.Component {
     this.props.changeVmName(this.name.value)
   }
 
+  changeVmDescription () {
+    this.props.changeVmDescription(this.description.value)
+  }
+
+  changeVmComment () {
+    this.props.changeVmComment(this.comment.value)
+  }
+
   changeVmMemory () {
     this.props.changeVmMemory(this.memory.value)
+  }
+
+  changeVmMaxMemory () {
+    this.props.changeVmMemoryMax(this.maxMemory.value)
+  }
+
+  changeVmGuaranteedMemory () {
+    this.props.changeVmMemoryGuaranteed(this.guaranteedMemory.value)
   }
 
   changeVmCpu () {
@@ -160,79 +186,129 @@ class vmDialog extends React.Component {
   render () {
     return (
       <DetailContainer>
-        <h1>{this.props.type === 'edit' ? 'Edit Virtual Machine' : 'Create A New Virtual Machine'}</h1>
-        <hr />
-        <ErrorAlert message={this.props.errorMessage} />
-        <form className='form-horizontal'>
-          <LabeledSelect
-            id='clusterSelect'
-            label='Cluster'
-            selectClass='combobox form-control'
-            getValue={(input) => { this.cluster = input }}
-            onChange={this.changeCluster}
-            value={this.props.cluster.get('name')}
-            data={this.props.clusters.get('clusters').sort((a, b) =>
-              a.get('name').localeCompare(b.get('name'))
-            )} />
-
-          <LabeledSelect
-            id='templateSelect'
-            label='Template'
-            selectClass='combobox form-control'
-            getValue={(input) => { this.template = input }}
-            onChange={this.changeTemplate}
-            value={this.props.template.get('name')}
-            data={this.props.templates.get('templates').toList().filter(template => (
-                template.get('cluster') === this.props.cluster.get('id') || template.get('cluster') === '0')
-              ).sort((a, b) => a.get('name').localeCompare(b.get('name')))} />
-
-          <LabeledSelect
-            id='operatingSystemSelect'
-            label='Operating System'
-            selectClass='combobox form-control'
-            getValue={(input) => { this.os = input }}
-            onChange={this.changeOperatingSystem}
-            value={this.props.os.get('name')}
-            data={this.props.operatingSystems.get('operatingSystems').toList().sort((a, b) =>
-              a.get('name').localeCompare(b.get('name'))
-            )}
-            renderer={(item) => item.get('description')} />
-
-          <LabeledTextField
-            selectClass='combobox form-control'
-            getValue={(input) => { this.name = input }}
-            id='vmName'
-            label='Name'
-            placeholder='VM Name'
-            value={this.props.vmName}
-            setValue={this.changeVmName} />
-
-          <LabeledTextField
-            getValue={(input) => { this.memory = input }}
-            type='number'
-            id='vmMemory'
-            label='Memory (MB)'
-            placeholder='VM Memory'
-            value={this.props.memory}
-            setValue={this.changeVmMemory}
-            step={256} />
-
-          <LabeledTextField
-            getValue={(input) => { this.cpus = input }}
-            type='number'
-            id='vmCpu'
-            label='CPU'
-            placeholder='CPUs'
-            value={this.props.cpu}
-            setValue={this.changeVmCpu} />
-
-          <div className='form-group'>
-            <div className='col-sm-offset-2 col-sm-10'>
-              <button className='btn btn-default' type='submit' onClick={this.closeDialog}>Close</button>
-              <button className='btn btn-primary' type='submit' onClick={this.submitHandler}>Submit</button>
-            </div>
+        <div className='panel panel-default'>
+          <div className='panel-heading'>
+            <h3 className='panel-title'>{this.props.type === 'edit' ? 'Edit Virtual Machine' : 'Create A New Virtual Machine'}</h3>
           </div>
-        </form>
+          <div className='panel-body'>
+            <ErrorAlert message={this.props.errorMessage} />
+            <form className='form-horizontal' >
+              <LabeledSelect
+                id='clusterSelect'
+                label='Cluster'
+                selectClass='combobox form-control'
+                getValue={(input) => { this.cluster = input }}
+                onChange={this.changeCluster}
+                value={this.props.cluster.get('name')}
+                data={this.props.clusters.get('clusters').sort((a, b) =>
+                  a.get('name').localeCompare(b.get('name'))
+                )} />
+
+              <LabeledSelect
+                id='templateSelect'
+                label='Template'
+                selectClass='combobox form-control'
+                getValue={(input) => { this.template = input }}
+                onChange={this.changeTemplate}
+                value={this.props.template.get('name')}
+                data={this.props.templates.get('templates').toList().filter(template => (
+                    template.get('cluster') === this.props.cluster.get('id') || template.get('cluster') === '0')
+                  ).sort((a, b) => a.get('name').localeCompare(b.get('name')))} />
+
+              <LabeledSelect
+                id='operatingSystemSelect'
+                label='Operating System'
+                selectClass='combobox form-control'
+                getValue={(input) => { this.os = input }}
+                onChange={this.changeOperatingSystem}
+                value={this.props.os.get('name')}
+                data={this.props.operatingSystems.get('operatingSystems').toList().sort((a, b) =>
+                  a.get('name').localeCompare(b.get('name'))
+                )}
+                renderer={(item) => item.get('description')} />
+
+              <LabeledTextField
+                selectClass='combobox form-control'
+                getValue={(input) => { this.name = input }}
+                id='vmName'
+                label='Name'
+                placeholder='VM Name'
+                value={this.props.vmName}
+                setValue={this.changeVmName} />
+
+              <LabeledTextField
+                selectClass='combobox form-control'
+                getValue={(input) => { this.description = input }}
+                id='vmDescription'
+                label='Description'
+                placeholder='Please enter a description for virtual machine'
+                value={this.props.vmDescription}
+                setValue={this.changeVmDescription} />
+
+              <LabeledTextField
+                selectClass='combobox form-control'
+                getValue={(input) => { this.comment = input }}
+                id='vmComment'
+                label='Comment'
+                placeholder='Please enter a comment for virtual machine'
+                value={this.props.vmComment}
+                setValue={this.changeVmComment} />
+
+              <LabeledTextField
+                getValue={(input) => { this.memory = input }}
+                type='number'
+                id='vmMemory'
+                label='Memory (MB)'
+                placeholder='VM Memory'
+                value={this.props.memory}
+                setValue={this.changeVmMemory}
+                step={256} />
+
+              <LabeledTextField
+                getValue={(input) => { this.maxMemory = input }}
+                type='number'
+                id='vmMaxMemory'
+                label='Max memory (MB)'
+                placeholder='Maximum memory of VM'
+                value={this.props.maxMemory}
+                setValue={this.changeVmMaxMemory}
+                step={256} />
+
+              <LabeledTextField
+                getValue={(input) => { this.guaranteedMemory = input }}
+                type='number'
+                id='vmGuaranteedMemory'
+                label='Memory guaranteed (MB)'
+                placeholder='Maximal memory guaranteed'
+                value={this.props.guaranteedMemory}
+                setValue={this.changeVmGuaranteedMemory}
+                step={256} />
+
+              <LabeledTextField
+                getValue={(input) => { this.cpus = input }}
+                type='number'
+                id='vmCpu'
+                label='CPU'
+                placeholder='CPUs'
+                value={this.props.cpu}
+                setValue={this.changeVmCpu} />
+
+              <LabeledSwitch
+                getValue={(input) => { this.memoryBallon = input }}
+                id='memoryBalloon'
+                label='Memory balloon'
+                value={this.props.memoryBalloon === 'true'}
+                setValue={this.changeVmCpu} />
+
+              <div className='form-group'>
+                <div className='col-sm-offset-2 col-sm-10' style={{ 'textAlign': 'right' }}>
+                  <button className='btn btn-default' type='submit' onClick={this.props.closeDialog}>Close</button>
+                  <button className='btn btn-primary' type='submit' onClick={this.submitHandler}>Submit</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
       </DetailContainer>
     )
   }
@@ -255,12 +331,21 @@ vmDialog.propTypes = {
     PropTypes.number,
   ]),
   vmName: PropTypes.string.isRequired,
+  vmDescription: PropTypes.string,
+  memoryBalloon: PropTypes.string,
+  guaranteedMemory: PropTypes.string,
+  maxMemory: PropTypes.string,
+  vmComment: PropTypes.string,
   vmId: PropTypes.string.isRequired,
   changeCluster: PropTypes.func.isRequired,
   changeTemplate: PropTypes.func.isRequired,
   changeOperatingSystem: PropTypes.func.isRequired,
   changeVmName: PropTypes.func.isRequired,
+  changeVmDescription: PropTypes.func.isRequired,
+  changeVmComment: PropTypes.func.isRequired,
   changeVmMemory: PropTypes.func.isRequired,
+  changeVmMemoryGuaranteed: PropTypes.func.isRequired,
+  changeVmMemoryMax: PropTypes.func.isRequired,
   changeVmCpu: PropTypes.func.isRequired,
   closeDialog: PropTypes.func.isRequired,
   setErrorMessage: PropTypes.func.isRequired,
@@ -279,9 +364,14 @@ export default connect(
     template: state.vmDialog.get('template'),
     os: state.vmDialog.get('os'),
     memory: state.vmDialog.get('memory'),
+    guaranteedMemory: state.vmDialog.get('memoryGuaranteed'),
+    maxMemory: state.vmDialog.get('memoryMax'),
+    memoryBalloon: state.vmDialog.get('memoryBallon'),
     cpu: state.vmDialog.get('cpu'),
     heading: state.vmDialog.get('dialogName'),
     vmName: state.vmDialog.get('name'),
+    vmDescription: state.vmDialog.get('description'),
+    vmComment: state.vmDialog.get('comment'),
     vmId: state.vmDialog.get('vmId'),
     errorMessage: state.vmDialog.get('errorMessage'),
   }),
@@ -298,8 +388,16 @@ export default connect(
       dispatch(changeTemplate(template)),
     changeVmName: (name) =>
       dispatch(updateVmName(name)),
+    changeVmDescription: (description) =>
+      dispatch(updateVmDescription(description)),
+    changeVmComment: (comment) =>
+      dispatch(updateVmComment(comment)),
     changeVmMemory: (memory) =>
       dispatch(updateVmMemory(memory)),
+    changeVmMemoryMax: (memory) =>
+      dispatch(updateVmMemoryMax(memory)),
+    changeVmMemoryGuaranteed: (memory) =>
+      dispatch(updateVmMemoryGuaranteed(memory)),
     changeVmCpu: (cpu) =>
       dispatch(updateVmCpu(cpu)),
     closeDialog: () =>

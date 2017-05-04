@@ -38,6 +38,9 @@ Selectors = {
     return getState().operatingSystems.get('operatingSystems').toList().find(os =>
       os.get('name') === name)
   },
+  getVmById (id) {
+    return getState().vms.get('vms').get(id)
+  },
 }
 
 function getState () {

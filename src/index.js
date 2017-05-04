@@ -15,6 +15,7 @@ window.patternfly = {}
 window.patternfly = require('patternfly/dist/js/patternfly')
 window.selectpicker = require('bootstrap-select/js/bootstrap-select.js')
 window.combobox = require('patternfly-bootstrap-combobox/js/bootstrap-combobox.js')
+window.switch = require('bootstrap-switch/dist/js/bootstrap-switch.min.js')
 
 import store, { sagaMiddleware } from './store'
 import Selectors from './selectors'

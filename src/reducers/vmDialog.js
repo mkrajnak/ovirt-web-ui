@@ -8,7 +8,12 @@ const vmDialogReducer = actionReducer(fromJS({
   template: {},
   os: {},
   name: '',
+  description: '',
+  comment: '',
   memory: '',
+  guaranteedMemory: '',
+  maxMemory: '',
+  memoryBallon: '',
   cpu: {},
   errorMessage: '',
 }), {
@@ -24,8 +29,23 @@ const vmDialogReducer = actionReducer(fromJS({
   UPDATE_VM_NAME (state, { payload: { name } }) {
     return state.set('name', fromJS(name))
   },
+  UPDATE_VM_DESCRIPTION (state, { payload: { description } }) {
+    return state.set('description', fromJS(description))
+  },
+  UPDATE_VM_COMMENT (state, { payload: { comment } }) {
+    return state.set('comment', fromJS(comment))
+  },
   UPDATE_VM_MEMORY (state, { payload: { memory } }) {
     return state.set('memory', fromJS(memory))
+  },
+  UPDATE_VM_MEMORY_MAX (state, { payload: { value } }) {
+    return state.set('memoryMax', fromJS(value))
+  },
+  UPDATE_VM_MEMORY_GUARANTEED (state, { payload: { value } }) {
+    return state.set('memoryGuaranteed', fromJS(value))
+  },
+  UPDATE_VM_MEMORY_BALLOON (state, { payload: { value } }) {
+    return state.set('memoryBallon', fromJS(value))
   },
   UPDATE_VM_CPU (state, { payload: { cpu } }) {
     return state.set('cpu', fromJS(cpu))

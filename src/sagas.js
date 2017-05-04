@@ -35,6 +35,11 @@ import {
   updateVmMemory,
   updateVmCpu,
   updateVmName,
+  updateVmDescription,
+  updateVmComment,
+  updateVmMemoryBalloon,
+  updateVmMemoryMax,
+  updateVmMemoryGuaranteed,
   updateDialogType,
   updateVmId,
   updateEditTemplateName,
@@ -278,28 +283,36 @@ function* startVm (action) {
 }
 
 function* showEditVm (action) {
-  yield put(updateDialogType('edit'))
-  const cluster = Selectors.getClusterById(action.payload.vm.get('cluster').get('id'))
-  yield put(updateCluster(cluster))
+  // fetch the vm again to get more details and to make sure that vm was not deleted
+  yield fetchSingleVm(getSingleVm({ vmId: action.payload.vm.get('id') }))
+  const vm = yield Selectors.getVmById(action.payload.vm.get('id'))
 
-  const template = Selectors.getTemplateById(action.payload.vm.get('template').get('id'))
-  yield put(updateTemplate(template))
+  if (vm) {
+    yield put(updateDialogType('edit'))
+    const cluster = Selectors.getClusterById(vm.get('cluster').get('id'))
+    yield put(updateCluster(cluster))
 
-  yield put(updateVmId(action.payload.vm.get('id')))
+    const template = Selectors.getTemplateById(vm.get('template').get('id'))
+    yield put(updateTemplate(template))
 
-  const os = Selectors.getOperatingSystemByName(action.payload.vm.get('os').get('type'))
-  yield put(updateOperatingSystem(os))
+    yield put(updateVmId(vm.get('id')))
 
-  const name = action.payload.vm.get('name')
-  yield put(updateVmName(name))
+    const os = Selectors.getOperatingSystemByName(vm.get('os').get('type'))
+    yield put(updateOperatingSystem(os))
 
-  const memory = action.payload.vm.get('memory').get('total')
-  yield put(updateVmMemory(memory))
+    yield put(updateVmName(vm.get('name')))
+    yield put(updateVmDescription(vm.get('description')))
+    yield put(updateVmComment(vm.get('comment')))
 
-  const cpu = action.payload.vm.get('cpu').get('vCPUs')
-  yield put(updateVmCpu(cpu))
-  yield put(openVmDialog())
-  yield put(setVmDetailToShow({ vmId: action.payload.vm.get('id') }))
+    yield put(updateVmMemoryBalloon(vm.get('memory').get('balloon')))
+    yield put(updateVmMemoryMax(vm.get('memory').get('max')))
+    yield put(updateVmMemoryGuaranteed(vm.get('memory').get('guaranteed')))
+    yield put(updateVmMemory(vm.get('memory').get('total')))
+
+    yield put(updateVmCpu(vm.get('cpu').get('vCPUs')))
+    yield put(openVmDialog())
+    yield put(setVmDetailToShow({ vmId: vm.get('id') }))
+  }
 }
 
 function* showAddNewVm (action) {
@@ -309,7 +322,12 @@ function* showAddNewVm (action) {
   yield put(changeCluster(cluster))
   yield put(updateVmId('0'))
   yield put(updateVmName(''))
+  yield put(updateVmComment(''))
+  yield put(updateVmDescription(''))
   yield put(openVmDialog())
+  yield put(updateVmMemoryBalloon(''))
+  yield put(updateVmMemoryMax(''))
+  yield put(updateVmMemoryGuaranteed(''))
 }
 
 function* handleClusterChange (action) {

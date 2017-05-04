@@ -50,6 +50,51 @@ export function updateVmName (name) {
   }
 }
 
+export function updateVmDescription (description) {
+  return {
+    type: 'UPDATE_VM_DESCRIPTION',
+    payload: {
+      description,
+    },
+  }
+}
+
+export function updateVmMemoryGuaranteed (value) {
+  return {
+    type: 'UPDATE_VM_MEMORY_GUARANTEED',
+    payload: {
+      value,
+    },
+  }
+}
+
+export function updateVmMemoryMax (value) {
+  return {
+    type: 'UPDATE_VM_MEMORY_MAX',
+    payload: {
+      value,
+    },
+  }
+}
+
+export function updateVmMemoryBalloon (value) {
+  return {
+    type: 'UPDATE_VM_MEMORY_BALLOON',
+    payload: {
+      value,
+    },
+  }
+}
+
+export function updateVmComment (comment) {
+  return {
+    type: 'UPDATE_VM_COMMENT',
+    payload: {
+      comment,
+    },
+  }
+}
+
 export function updateVmMemory (memory) {
   return {
     type: 'UPDATE_VM_MEMORY',

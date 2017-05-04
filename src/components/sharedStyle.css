@@ -12,3 +12,7 @@
 .move-left-detail-invisible {
     opacity: 0;
 }
+
+.scroll{
+  overflow: auto;
+}

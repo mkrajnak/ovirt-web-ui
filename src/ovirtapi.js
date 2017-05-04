@@ -122,6 +122,8 @@ OvirtApi = {
       memory: {
         total: OvirtApi._getVmMemory(vm['memory']),
         guaranteed: vm['memory_policy'] ? OvirtApi._getVmMemory(vm.memory_policy['guaranteed']) : undefined,
+        max: vm['memory_policy'] ? OvirtApi._getVmMemory(vm.memory_policy['max']) : undefined,
+        balloon: vm['memory_policy'] ? vm.memory_policy['ballooning'] : 'false',
       },
 
       os: {
@@ -143,6 +145,9 @@ OvirtApi = {
       },
       disks: {},
       consoles: [],
+      deleteProtection: vm['delete_protected'],
+      IOThreads: vm['io'] ? vm.io['threads'] : '0',
+      comment: vm['comment'],
     }
   },
   /**
