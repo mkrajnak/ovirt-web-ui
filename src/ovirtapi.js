@@ -131,7 +131,7 @@ OvirtApi = {
       },
 
       highAvailability: {
-        enabled: vm['high_availability'] ? vm.high_availability['enabled'] : undefined,
+        enabled: vm['high_availability'] ? vm.high_availability['enabled'] : 'false',
         priority: vm['high_availability'] ? vm.high_availability['priority'] : undefined,
       },
 

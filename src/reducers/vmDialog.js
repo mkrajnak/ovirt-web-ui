@@ -13,8 +13,10 @@ const vmDialogReducer = actionReducer(fromJS({
   memory: '',
   guaranteedMemory: '',
   maxMemory: '',
-  memoryBallon: '',
   cpu: {},
+  memoryBallon: '',
+  startInPauseMode: '',
+  deleteProtection: '',
   errorMessage: '',
 }), {
   UPDATE_CLUSTER (state, { payload: { cluster } }) {
@@ -46,6 +48,18 @@ const vmDialogReducer = actionReducer(fromJS({
   },
   UPDATE_VM_MEMORY_BALLOON (state, { payload: { value } }) {
     return state.set('memoryBallon', fromJS(value))
+  },
+  UPDATE_VM_START_IN_PAUSED_MODE (state, { payload: { value } }) {
+    return state.set('startInPauseMode', fromJS(value))
+  },
+  UPDATE_VM_DELETE_PROTECTION (state, { payload: { value } }) {
+    return state.set('deleteProtection', fromJS(value))
+  },
+  UPDATE_VM_HIGH_AVAILABILITY (state, { payload: { value } }) {
+    return state.set('highAvailability', fromJS(value))
+  },
+  UPDATE_VM_IO_THREADS (state, { payload: { value } }) {
+    return state.set('iothreads', fromJS(value))
   },
   UPDATE_VM_CPU (state, { payload: { cpu } }) {
     return state.set('cpu', fromJS(cpu))

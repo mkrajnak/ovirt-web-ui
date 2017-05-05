@@ -21,6 +21,11 @@ import {
   updateVmMemory,
   updateVmMemoryMax,
   updateVmMemoryGuaranteed,
+  updateVmMemoryBalloon,
+  updateVmDeleteProtection,
+  updateVmStartInPausedMode,
+  updateVmIOThreads,
+  updateVmHighAvailability,
   updateVmCpu,
   updateVmDialogErrorMessage,
 } from './actions'
@@ -60,6 +65,23 @@ class vmDialog extends React.Component {
     $(this.os).combobox()
     $("input[type='text'].combobox").on('change', () => $(this.changeOperatingSystem))
     $(this.memoryBallon).bootstrapSwitch()
+    $(this.memoryBallon).on('switchChange.bootstrapSwitch',
+      (event, state) => $(this.props.changeVmMemoryBalloon(state)))
+    $(this.startInPausedMode).bootstrapSwitch()
+    $(this.startInPausedMode).on('switchChange.bootstrapSwitch',
+      (event, state) => $(this.props.changeVmStartInPausedMode(state)))
+    $(this.deleteProtection).bootstrapSwitch()
+    $(this.deleteProtection).on('switchChange.bootstrapSwitch',
+      (event, state) => $(this.props.changeVmDeleteProtection(state)))
+    $(this.memoryBallon).bootstrapSwitch()
+    $(this.memoryBallon).on('switchChange.bootstrapSwitch',
+      (event, state) => $(this.props.changeVmMemoryBalloon(state)))
+    $(this.highAvailability).bootstrapSwitch()
+    $(this.highAvailability).on('switchChange.bootstrapSwitch',
+      (event, state) => $(this.props.changeVmHighAvailability(state)))
+    $(this.iothreads).bootstrapSwitch()
+    $(this.iothreads).on('switchChange.bootstrapSwitch',
+      (event, state) => $(this.props.changeVmIOThreads(state)))
   }
 
   submitHandler (e) {
@@ -67,16 +89,23 @@ class vmDialog extends React.Component {
     this.props.type === 'edit' ? this.editVm() : this.createNewVm()
   }
 
-  getMemory () {
-    return parseInt(this.memory.value) * 1048576
+  getMemory (value) {
+    return parseInt(value) * 1048576
   }
 
   editVm () {
     const vm = {
       'name': this.name.value,
+      'comment': this.comment.value,
+      'description': this.description.value,
       'template': { 'name': this.template.value },
       'cluster': { 'name': this.cluster.value },
-      'memory': this.getMemory(),
+      'memory': this.getMemory(this.memory.value),
+      memory_policy: {
+        guaranteed: this.getMemory(this.guaranteedMemory.value),
+        max: this.getMemory(this.maxMemory.value),
+        ballooning: this.props.memoryBalloon === 'true',
+      },
       'os': {
         'type': this.os.value,
       },
@@ -95,10 +124,19 @@ class vmDialog extends React.Component {
     const vm = {
       'vm': {
         'name': this.name.value,
+        'comment': this.comment.value,
+        'description': this.description.value,
         'template': { 'name': this.template.value },
         'cluster': { 'name': this.cluster.value },
-        'memory': this.getMemory(),
-        'os': { 'type': this.os.value },
+        'memory': this.getMemory(this.memory.value),
+        'memory_policy': {
+          guaranteed: this.getMemory(this.guaranteedMemory.value),
+          max: this.getMemory(this.maxMemory.value),
+          ballooning: this.props.memoryBalloon === 'true',
+        },
+        'os': {
+          'type': this.os.value,
+        },
         'cpu': {
           'topology': {
             'cores': '1',
@@ -298,7 +336,35 @@ class vmDialog extends React.Component {
                 id='memoryBalloon'
                 label='Memory balloon'
                 value={this.props.memoryBalloon === 'true'}
-                setValue={this.changeVmCpu} />
+                setValue={this.props.changeVmMemoryBalloon} />
+
+              <LabeledSwitch
+                getValue={(input) => { this.deleteProtection = input }}
+                id='deleteProtection'
+                label='Delete Protection'
+                value={this.props.deleteProtection === 'true'}
+                setValue={this.props.changeVmDeleteProtection} />
+
+              <LabeledSwitch
+                getValue={(input) => { this.startInPausedMode = input }}
+                id='startInPausedMode'
+                label='Start in paused mode'
+                value={this.props.startInPausedMode === 'true'}
+                setValue={this.props.changeVmStartInPausedMode} />
+
+              <LabeledSwitch
+                getValue={(input) => { this.iothreads = input }}
+                id='iothreads'
+                label='IO Threads'
+                value={parseInt(this.props.iothreads) > 0}
+                setValue={this.props.changeVmIOThreads} />
+
+              <LabeledSwitch
+                getValue={(input) => { this.highAvailability = input }}
+                id='highAvailability'
+                label='High Availability'
+                value={this.props.highAvailability === 'true'}
+                setValue={this.props.changeVmHighAvailability} />
 
               <div className='form-group'>
                 <div className='col-sm-offset-2 col-sm-10' style={{ 'textAlign': 'right' }}>
@@ -332,9 +398,34 @@ vmDialog.propTypes = {
   ]),
   vmName: PropTypes.string.isRequired,
   vmDescription: PropTypes.string,
-  memoryBalloon: PropTypes.string,
-  guaranteedMemory: PropTypes.string,
-  maxMemory: PropTypes.string,
+  memoryBalloon: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
+  ]),
+  startInPausedMode: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
+  ]),
+  deleteProtection: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
+  ]),
+  guaranteedMemory: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
+  maxMemory: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
+  iothreads: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
+  ]),
+  highAvailability: PropTypes.oneOfType([
+    PropTypes.bool,
+    PropTypes.string,
+  ]),
   vmComment: PropTypes.string,
   vmId: PropTypes.string.isRequired,
   changeCluster: PropTypes.func.isRequired,
@@ -346,6 +437,11 @@ vmDialog.propTypes = {
   changeVmMemory: PropTypes.func.isRequired,
   changeVmMemoryGuaranteed: PropTypes.func.isRequired,
   changeVmMemoryMax: PropTypes.func.isRequired,
+  changeVmMemoryBalloon: PropTypes.func.isRequired,
+  changeVmDeleteProtection: PropTypes.func.isRequired,
+  changeVmStartInPausedMode: PropTypes.func.isRequired,
+  changeVmHighAvailability: PropTypes.func.isRequired,
+  changeVmIOThreads: PropTypes.func.isRequired,
   changeVmCpu: PropTypes.func.isRequired,
   closeDialog: PropTypes.func.isRequired,
   setErrorMessage: PropTypes.func.isRequired,
@@ -367,6 +463,10 @@ export default connect(
     guaranteedMemory: state.vmDialog.get('memoryGuaranteed'),
     maxMemory: state.vmDialog.get('memoryMax'),
     memoryBalloon: state.vmDialog.get('memoryBallon'),
+    startInPausedMode: state.vmDialog.get('startPaused'),
+    deleteProtection: state.vmDialog.get('deleteProtection'),
+    highAvailability: state.vmDialog.get('highAvailability'),
+    iothreads: state.vmDialog.get('iothreads'),
     cpu: state.vmDialog.get('cpu'),
     heading: state.vmDialog.get('dialogName'),
     vmName: state.vmDialog.get('name'),
@@ -398,6 +498,16 @@ export default connect(
       dispatch(updateVmMemoryMax(memory)),
     changeVmMemoryGuaranteed: (memory) =>
       dispatch(updateVmMemoryGuaranteed(memory)),
+    changeVmMemoryBalloon: (value) =>
+      dispatch(updateVmMemoryBalloon(value)),
+    changeVmDeleteProtection: (value) =>
+      dispatch(updateVmDeleteProtection(value)),
+    changeVmStartInPausedMode: (value) =>
+      dispatch(updateVmStartInPausedMode(value)),
+    changeVmHighAvailability: (value) =>
+      dispatch(updateVmHighAvailability(value)),
+    changeVmIOThreads: (value) =>
+      dispatch(updateVmIOThreads(value)),
     changeVmCpu: (cpu) =>
       dispatch(updateVmCpu(cpu)),
     closeDialog: () =>

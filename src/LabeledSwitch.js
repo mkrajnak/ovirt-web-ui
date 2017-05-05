@@ -1,5 +1,7 @@
 import React, { PropTypes } from 'react'
 
+// onChange method is working only via jQuery
+// onChange method in thos component is only dummy, to supress warnings
 const LabeledSwitch = ({
   id,
   label,

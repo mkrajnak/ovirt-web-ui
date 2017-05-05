@@ -86,6 +86,42 @@ export function updateVmMemoryBalloon (value) {
   }
 }
 
+export function updateVmStartInPausedMode (value) {
+  return {
+    type: 'UPDATE_VM_START_IN_PAUSED_MODE',
+    payload: {
+      value,
+    },
+  }
+}
+
+export function updateVmDeleteProtection (value) {
+  return {
+    type: 'UPDATE_VM_DELETE_PROTECTION',
+    payload: {
+      value,
+    },
+  }
+}
+
+export function updateVmHighAvailability (value) {
+  return {
+    type: 'UPDATE_VM_HIGH_AVAILABILITY',
+    payload: {
+      value,
+    },
+  }
+}
+
+export function updateVmIOThreads (value) {
+  return {
+    type: 'UPDATE_VM_IO_THREADS',
+    payload: {
+      value,
+    },
+  }
+}
+
 export function updateVmComment (comment) {
   return {
     type: 'UPDATE_VM_COMMENT',
