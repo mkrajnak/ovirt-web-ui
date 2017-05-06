@@ -104,7 +104,7 @@ OvirtApi = {
       startTime: vm['start_time'] ? (new Date(vm['start_time'])).toUTCString() : undefined,
       stopTime: vm['stop_time'] ? (new Date(vm['stop_time'])).toUTCString() : undefined,
       creationTime: vm['creation_time'] ? (new Date(vm['creation_time'])).toUTCString() : undefined,
-      startPaused: vm['start_paused'],
+      startPaused: vm['start_paused'] === 'true',
 
       fqdn: vm['fqdn'],
 
@@ -123,7 +123,7 @@ OvirtApi = {
         total: OvirtApi._getVmMemory(vm['memory']),
         guaranteed: vm['memory_policy'] ? OvirtApi._getVmMemory(vm.memory_policy['guaranteed']) : undefined,
         max: vm['memory_policy'] ? OvirtApi._getVmMemory(vm.memory_policy['max']) : undefined,
-        balloon: vm['memory_policy'] ? vm.memory_policy['ballooning'] : 'false',
+        balloon: vm['memory_policy'] ? vm.memory_policy['ballooning'] === 'true' : false,
       },
 
       os: {
@@ -131,8 +131,15 @@ OvirtApi = {
       },
 
       highAvailability: {
-        enabled: vm['high_availability'] ? vm.high_availability['enabled'] : 'false',
+        enabled: vm['high_availability'] ? vm.high_availability['enabled'] === 'true' : false,
         priority: vm['high_availability'] ? vm.high_availability['priority'] : undefined,
+      },
+
+      display: {
+        protocol: vm['display'] ? vm.display['type'] : 'spice',
+        smartcard: vm['display'] ? vm.display['copy_paste_enabled'] === 'true' : false,
+        fileTransfer: vm['display'] ? vm.display['file_transfer_enabled'] === 'true' : false,
+        copyPaste: vm['display'] ? vm.display['smartcard_enabled'] === 'true' : false,
       },
 
       icons: {
@@ -145,7 +152,7 @@ OvirtApi = {
       },
       disks: {},
       consoles: [],
-      deleteProtection: vm['delete_protected'],
+      deleteProtection: vm['delete_protected'] === 'true',
       IOThreads: vm['io'] ? vm.io['threads'] : '0',
       comment: vm['comment'],
     }

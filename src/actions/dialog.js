@@ -149,6 +149,77 @@ export function updateVmCpu (cpu) {
   }
 }
 
+export function updateVmBootDevices (devices) {
+  return {
+    type: 'UPDATE_VM_BOOT_DEVICES',
+    payload: {
+      devices,
+    },
+  }
+}
+
+export function updateVmConsoles (consoles) {
+  return {
+    type: 'UPDATE_VM_CONSOLES',
+    payload: {
+      consoles,
+    },
+  }
+}
+
+export function updateVmConsoleProtocol (protocol) {
+  return {
+    type: 'UPDATE_VM_CONSOLE_PROTOCOL',
+    payload: {
+      protocol,
+    },
+  }
+}
+
+export function updateVmSmartCard (value) {
+  return {
+    type: 'UPDATE_VM_SMART_CARD',
+    payload: {
+      value,
+    },
+  }
+}
+
+export function updateVmFileTransfer (value) {
+  return {
+    type: 'UPDATE_VM_FILE_TRANSFER',
+    payload: {
+      value,
+    },
+  }
+}
+
+export function updateVmFirstBootDevice (value) {
+  return {
+    type: 'UPDATE_VM_FIRST_BOOT_DEVICE',
+    payload: {
+      value,
+    },
+  }
+}
+
+export function updateVmSecondBootDevice (value) {
+  return {
+    type: 'UPDATE_VM_SECOND_BOOT_DEVICE',
+    payload: {
+      value,
+    },
+  }
+}
+export function updateVmCopyPaste (value) {
+  return {
+    type: 'UPDATE_VM_COPY_PASTE',
+    payload: {
+      value,
+    },
+  }
+}
+
 export function getAllOperatingSystems () {
   return {
     type: 'GET_ALL_OS',

@@ -42,6 +42,17 @@ import {
   updateVmMemoryGuaranteed,
   updateDialogType,
   updateVmId,
+  updateVmHighAvailability,
+  updateVmStartInPausedMode,
+  updateVmDeleteProtection,
+  updateVmIOThreads,
+  updateVmConsoles,
+  updateVmConsoleProtocol,
+  updateVmCopyPaste,
+  updateVmFileTransfer,
+  updateVmSmartCard,
+  updateVmBootDevices,
+  updateVmFirstBootDevice,
   updateEditTemplateName,
   updateEditTemplateDescription,
   updateEditTemplateOS,
@@ -303,6 +314,41 @@ function* showEditVm (action) {
     yield put(updateVmName(vm.get('name')))
     yield put(updateVmDescription(vm.get('description')))
     yield put(updateVmComment(vm.get('comment')))
+    yield put(updateVmHighAvailability(vm.get('highAvailability').get('enabled')))
+    yield put(updateVmStartInPausedMode(vm.get('startPaused')))
+    yield put(updateVmDeleteProtection(vm.get('deleteProtection')))
+    yield put(updateVmIOThreads(vm.get('IOThreads')))
+    // yield put(updateVmConsoles(vm.get('consoles')))
+    yield put(updateVmConsoles([
+      {
+        id: '0',
+        protocol: 'spice',
+      },
+      {
+        id: '1',
+        protocol: 'vnc',
+      },
+    ],
+    ))
+    yield put(updateVmBootDevices([
+      {
+        id: '0',
+        name: 'Network (PXE)',
+      },
+      {
+        id: '1',
+        name: 'Hard-Disk',
+      },
+      {
+        id: '3',
+        name: 'CD-ROM',
+      },
+    ],
+    ))
+    yield put(updateVmCopyPaste(vm.get('display').get('copyPaste')))
+    yield put(updateVmFileTransfer(vm.get('display').get('fileTransfer')))
+    yield put(updateVmSmartCard(vm.get('display').get('smartcard')))
+    yield put(updateVmConsoleProtocol(vm.get('display').get('protocol')))
 
     yield put(updateVmMemoryBalloon(vm.get('memory').get('balloon')))
     yield put(updateVmMemoryMax(vm.get('memory').get('max')))
@@ -324,10 +370,46 @@ function* showAddNewVm (action) {
   yield put(updateVmName(''))
   yield put(updateVmComment(''))
   yield put(updateVmDescription(''))
-  yield put(openVmDialog())
-  yield put(updateVmMemoryBalloon(''))
+  yield put(updateVmMemoryBalloon(false))
+  yield put(updateVmHighAvailability(false))
+  yield put(updateVmStartInPausedMode(false))
+  yield put(updateVmDeleteProtection(false))
+  yield put(updateVmCopyPaste(false))
+  yield put(updateVmFileTransfer(false))
+  yield put(updateVmSmartCard(false))
+  yield put(updateVmConsoles([
+    {
+      id: '0',
+      protocol: 'spice',
+    },
+    {
+      id: '1',
+      protocol: 'vnc',
+    },
+  ],
+  ))
+  yield put(updateVmBootDevices([
+    {
+      id: '0',
+      name: 'Network (PXE)',
+    },
+    {
+      id: '1',
+      name: 'Hard-Disk',
+    },
+    {
+      id: '3',
+      name: 'CD-ROM',
+    },
+  ],
+  ))
+  yield put(updateVmFirstBootDevice('Network (PXE)'))
+  yield put(updateVmConsoleProtocol('spice'))
+  yield put(updateVmIOThreads(false))
   yield put(updateVmMemoryMax(''))
   yield put(updateVmMemoryGuaranteed(''))
+
+  yield put(openVmDialog())
 }
 
 function* handleClusterChange (action) {

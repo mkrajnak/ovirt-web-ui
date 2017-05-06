@@ -25,6 +25,12 @@ import {
   updateVmDeleteProtection,
   updateVmStartInPausedMode,
   updateVmIOThreads,
+  updateVmConsoleProtocol,
+  updateVmCopyPaste,
+  updateVmFileTransfer,
+  updateVmSmartCard,
+  updateVmFirstBootDevice,
+  updateVmSecondBootDevice,
   updateVmHighAvailability,
   updateVmCpu,
   updateVmDialogErrorMessage,
@@ -33,7 +39,7 @@ import {
 class vmDialog extends React.Component {
   constructor (props) {
     super(props)
-    this.createNewVm = this.createNewVm.bind(this)
+    this.submitVm = this.submitVm.bind(this)
     this.changeCluster = this.changeCluster.bind(this)
     this.changeTemplate = this.changeTemplate.bind(this)
     this.changeOperatingSystem = this.changeOperatingSystem.bind(this)
@@ -45,8 +51,11 @@ class vmDialog extends React.Component {
     this.changeVmMaxMemory = this.changeVmMaxMemory.bind(this)
     this.changeVmGuaranteedMemory = this.changeVmGuaranteedMemory.bind(this)
     this.changeVmCpu = this.changeVmCpu.bind(this)
-    this.submitHandler = this.submitHandler.bind(this)
     this.getMemory = this.getMemory.bind(this)
+    this.getThreads = this.getThreads.bind(this)
+    this.changeVmConsoleProtocol = this.changeVmConsoleProtocol.bind(this)
+    this.changeVmFirstBootDevice = this.changeVmFirstBootDevice.bind(this)
+    this.changeVmSecondBootDevice = this.changeVmSecondBootDevice.bind(this)
     this.clearErrorMessage = this.clearErrorMessage.bind(this)
   }
 
@@ -55,6 +64,17 @@ class vmDialog extends React.Component {
     $(this.cluster).combobox('refresh')
     $(this.template).combobox('refresh')
     $(this.os).combobox('refresh')
+    if (this.props.consoleProtocol !== 'spice') {
+      $(this.smartcard).bootstrapSwitch('disabled', true)
+      $(this.fileTransfer).bootstrapSwitch('disabled', true)
+      $(this.copyPaste).bootstrapSwitch('disabled', true)
+    } else {
+      $(this.smartcard).bootstrapSwitch('disabled', false)
+      $(this.fileTransfer).bootstrapSwitch('disabled', false)
+      $(this.copyPaste).bootstrapSwitch('disabled', false)
+    }
+    $(this.firstBootDevice).selectpicker('refresh')
+    $(this.secondBootDevice).selectpicker('refresh')
   }
 
   componentDidMount () {
@@ -64,36 +84,63 @@ class vmDialog extends React.Component {
     $("input[type='text'].combobox").on('change', () => $(this.changeTemplate))
     $(this.os).combobox()
     $("input[type='text'].combobox").on('change', () => $(this.changeOperatingSystem))
+
     $(this.memoryBallon).bootstrapSwitch()
     $(this.memoryBallon).on('switchChange.bootstrapSwitch',
       (event, state) => $(this.props.changeVmMemoryBalloon(state)))
+
     $(this.startInPausedMode).bootstrapSwitch()
     $(this.startInPausedMode).on('switchChange.bootstrapSwitch',
       (event, state) => $(this.props.changeVmStartInPausedMode(state)))
+
     $(this.deleteProtection).bootstrapSwitch()
     $(this.deleteProtection).on('switchChange.bootstrapSwitch',
       (event, state) => $(this.props.changeVmDeleteProtection(state)))
+
     $(this.memoryBallon).bootstrapSwitch()
     $(this.memoryBallon).on('switchChange.bootstrapSwitch',
       (event, state) => $(this.props.changeVmMemoryBalloon(state)))
+
     $(this.highAvailability).bootstrapSwitch()
     $(this.highAvailability).on('switchChange.bootstrapSwitch',
       (event, state) => $(this.props.changeVmHighAvailability(state)))
+
     $(this.iothreads).bootstrapSwitch()
     $(this.iothreads).on('switchChange.bootstrapSwitch',
       (event, state) => $(this.props.changeVmIOThreads(state)))
-  }
 
-  submitHandler (e) {
-    e.preventDefault()
-    this.props.type === 'edit' ? this.editVm() : this.createNewVm()
+    $(this.smartcard).bootstrapSwitch()
+    $(this.smartcard).on('switchChange.bootstrapSwitch',
+      (event, state) => $(this.props.changeVmSmartCard(state)))
+
+    $(this.fileTransfer).bootstrapSwitch()
+    $(this.fileTransfer).on('switchChange.bootstrapSwitch',
+      (event, state) => $(this.props.changeVmFileTransfer(state)))
+
+    $(this.copyPaste).bootstrapSwitch()
+    $(this.copyPaste).on('switchChange.bootstrapSwitch',
+      (event, state) => $(this.props.changeVmCopyPaste(state)))
+
+    $(this.graphicsProtocol).selectpicker()
+    $(this.firstBootDevice).selectpicker()
+    $(this.secondBootDevice).selectpicker()
   }
 
   getMemory (value) {
-    return parseInt(value) * 1048576
+    return value === '' ? '' : parseInt(value) * 1048576
   }
 
-  editVm () {
+  getThreads () {
+    if (typeof this.props.iothreads === 'string' || this.props.iothreads instanceof String) {
+      return this.props.iothreads
+    } else if (typeof this.props.iothreads === 'boolean') {
+      return this.props.iothreads ? 1 : 0
+    }
+  }
+
+  submitVm (e) {
+    e.preventDefault()
+
     const vm = {
       'name': this.name.value,
       'comment': this.comment.value,
@@ -101,13 +148,24 @@ class vmDialog extends React.Component {
       'template': { 'name': this.template.value },
       'cluster': { 'name': this.cluster.value },
       'memory': this.getMemory(this.memory.value),
-      memory_policy: {
-        guaranteed: this.getMemory(this.guaranteedMemory.value),
-        max: this.getMemory(this.maxMemory.value),
-        ballooning: this.props.memoryBalloon === 'true',
+      'delete_protected': this.props.deleteProtection,
+      'start_paused': this.props.startInPausedMode,
+      'memory_policy': {
+        'guaranteed': this.getMemory(this.guaranteedMemory.value),
+        'max': this.getMemory(this.maxMemory.value),
+        'ballooning': this.props.memoryBalloon,
+      },
+      'display': {
+        'type': this.graphicsProtocol.value,
+        'copy_paste_enabled': this.props.copyPaste,
+        'file_transfer_enabled': this.props.fileTransfer,
+        'smartcard_enabled': this.props.smartcard,
       },
       'os': {
         'type': this.os.value,
+      },
+      'high_availability': {
+        'enabled': this.props.highAvailability,
       },
       'cpu': {
         'topology': {
@@ -116,37 +174,17 @@ class vmDialog extends React.Component {
           'threads': '1',
         },
       },
-    }
-    this.props.edit(vm, this.props.vmId)
-  }
-
-  createNewVm () {
-    const vm = {
-      'vm': {
-        'name': this.name.value,
-        'comment': this.comment.value,
-        'description': this.description.value,
-        'template': { 'name': this.template.value },
-        'cluster': { 'name': this.cluster.value },
-        'memory': this.getMemory(this.memory.value),
-        'memory_policy': {
-          guaranteed: this.getMemory(this.guaranteedMemory.value),
-          max: this.getMemory(this.maxMemory.value),
-          ballooning: this.props.memoryBalloon === 'true',
-        },
-        'os': {
-          'type': this.os.value,
-        },
-        'cpu': {
-          'topology': {
-            'cores': '1',
-            'sockets': this.cpus.value,
-            'threads': '1',
-          },
-        },
+      'io': {
+        'threads': this.getThreads(),
       },
     }
-    this.props.addVm(vm)
+
+    if (this.props.type === 'edit') {
+      this.props.edit(vm, this.props.vmId)
+    } else {
+      console.log(vm)
+      this.props.addVm(vm)
+    }
   }
 
   closeDialog (e) {
@@ -213,6 +251,18 @@ class vmDialog extends React.Component {
 
   changeVmCpu () {
     this.props.changeVmCpu(this.cpus.value)
+  }
+
+  changeVmConsoleProtocol () {
+    this.props.changeVmConsoleProtocol(this.graphicsProtocol.value)
+  }
+
+  changeVmFirstBootDevice () {
+    this.props.changeVmFirstBootDevice(this.firstBootDevice.value)
+  }
+
+  changeVmSecondBootDevice () {
+    this.props.changeVmSecondBootDevice(this.secondBootDevice.value)
   }
 
   clearErrorMessage (entity) {
@@ -335,21 +385,21 @@ class vmDialog extends React.Component {
                 getValue={(input) => { this.memoryBallon = input }}
                 id='memoryBalloon'
                 label='Memory balloon'
-                value={this.props.memoryBalloon === 'true'}
+                value={this.props.memoryBalloon}
                 setValue={this.props.changeVmMemoryBalloon} />
 
               <LabeledSwitch
                 getValue={(input) => { this.deleteProtection = input }}
                 id='deleteProtection'
                 label='Delete Protection'
-                value={this.props.deleteProtection === 'true'}
+                value={this.props.deleteProtection}
                 setValue={this.props.changeVmDeleteProtection} />
 
               <LabeledSwitch
                 getValue={(input) => { this.startInPausedMode = input }}
                 id='startInPausedMode'
                 label='Start in paused mode'
-                value={this.props.startInPausedMode === 'true'}
+                value={this.props.startInPausedMode}
                 setValue={this.props.changeVmStartInPausedMode} />
 
               <LabeledSwitch
@@ -363,13 +413,60 @@ class vmDialog extends React.Component {
                 getValue={(input) => { this.highAvailability = input }}
                 id='highAvailability'
                 label='High Availability'
-                value={this.props.highAvailability === 'true'}
+                value={this.props.highAvailability}
                 setValue={this.props.changeVmHighAvailability} />
+
+              <LabeledSelect
+                id='graphicsProtocol'
+                label='Graphics Protocol'
+                getValue={(input) => { this.graphicsProtocol = input }}
+                onChange={this.changeVmConsoleProtocol}
+                value={this.props.consoleProtocol}
+                data={this.props.consoles}
+                renderer={(item) => item.get('protocol')} />
+
+              <LabeledSwitch
+                getValue={(input) => { this.smartcard = input }}
+                id='smartcard'
+                label='Smartcard'
+                value={this.props.smartcard}
+                setValue={this.props.changeVmSmartCard} />
+
+              <LabeledSwitch
+                getValue={(input) => { this.fileTransfer = input }}
+                id='fileTransfer'
+                label='Spice file transfer'
+                value={this.props.fileTransfer}
+                setValue={this.props.changeVmFileTransfer} />
+
+              <LabeledSwitch
+                getValue={(input) => { this.copyPaste = input }}
+                id='copyPaste'
+                label='Spice Copy Paste'
+                value={this.props.copyPaste}
+                setValue={this.props.changeVmCopyPaste} />
+
+              <LabeledSelect
+                id='firstBootDevice'
+                label='First device'
+                getValue={(input) => { this.firstBootDevice = input }}
+                onChange={this.changeVmFirstBootDevice}
+                value={this.props.firstBootDevice}
+                data={this.props.bootDevices} />
+
+              <LabeledSelect
+                id='secondBootDevice'
+                label='Second device'
+                getValue={(input) => { this.secondBootDevice = input }}
+                onChange={this.changeVmSecondBootDevice}
+                value={this.props.secondBootDevice}
+                data={this.props.bootDevices.toList().filter(device => (
+                  device.get('name') !== this.props.firstBootDevice))} />
 
               <div className='form-group'>
                 <div className='col-sm-offset-2 col-sm-10' style={{ 'textAlign': 'right' }}>
                   <button className='btn btn-default' type='submit' onClick={this.props.closeDialog}>Close</button>
-                  <button className='btn btn-primary' type='submit' onClick={this.submitHandler}>Submit</button>
+                  <button className='btn btn-primary' type='submit' onClick={this.submitVm}>Submit</button>
                 </div>
               </div>
             </form>
@@ -398,18 +495,14 @@ vmDialog.propTypes = {
   ]),
   vmName: PropTypes.string.isRequired,
   vmDescription: PropTypes.string,
-  memoryBalloon: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.string,
-  ]),
-  startInPausedMode: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.string,
-  ]),
-  deleteProtection: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.string,
-  ]),
+  memoryBalloon: PropTypes.bool,
+  startInPausedMode: PropTypes.bool,
+  deleteProtection: PropTypes.bool,
+  consoles: PropTypes.object,
+  consoleProtocol: PropTypes.string,
+  smartcard: PropTypes.bool,
+  fileTransfer: PropTypes.bool,
+  copyPaste: PropTypes.bool,
   guaranteedMemory: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.number,
@@ -422,10 +515,10 @@ vmDialog.propTypes = {
     PropTypes.bool,
     PropTypes.string,
   ]),
-  highAvailability: PropTypes.oneOfType([
-    PropTypes.bool,
-    PropTypes.string,
-  ]),
+  firstBootDevice: PropTypes.string,
+  secondBootDevice: PropTypes.string,
+  bootDevices: PropTypes.object,
+  highAvailability: PropTypes.bool,
   vmComment: PropTypes.string,
   vmId: PropTypes.string.isRequired,
   changeCluster: PropTypes.func.isRequired,
@@ -443,6 +536,12 @@ vmDialog.propTypes = {
   changeVmHighAvailability: PropTypes.func.isRequired,
   changeVmIOThreads: PropTypes.func.isRequired,
   changeVmCpu: PropTypes.func.isRequired,
+  changeVmConsoleProtocol: PropTypes.func.isRequired,
+  changeVmFirstBootDevice: PropTypes.func.isRequired,
+  changeVmSecondBootDevice: PropTypes.func.isRequired,
+  changeVmSmartCard: PropTypes.func.isRequired,
+  changeVmFileTransfer: PropTypes.func.isRequired,
+  changeVmCopyPaste: PropTypes.func.isRequired,
   closeDialog: PropTypes.func.isRequired,
   setErrorMessage: PropTypes.func.isRequired,
   addVm: PropTypes.func.isRequired,
@@ -463,7 +562,7 @@ export default connect(
     guaranteedMemory: state.vmDialog.get('memoryGuaranteed'),
     maxMemory: state.vmDialog.get('memoryMax'),
     memoryBalloon: state.vmDialog.get('memoryBallon'),
-    startInPausedMode: state.vmDialog.get('startPaused'),
+    startInPausedMode: state.vmDialog.get('startInPauseMode'),
     deleteProtection: state.vmDialog.get('deleteProtection'),
     highAvailability: state.vmDialog.get('highAvailability'),
     iothreads: state.vmDialog.get('iothreads'),
@@ -473,11 +572,19 @@ export default connect(
     vmDescription: state.vmDialog.get('description'),
     vmComment: state.vmDialog.get('comment'),
     vmId: state.vmDialog.get('vmId'),
+    consoles: state.vmDialog.get('consoles'),
+    consoleProtocol: state.vmDialog.get('consoleProtocol'),
+    smartcard: state.vmDialog.get('smartcard'),
+    fileTransfer: state.vmDialog.get('fileTransfer'),
+    copyPaste: state.vmDialog.get('copyPaste'),
+    firstBootDevice: state.vmDialog.get('firstBootDevice'),
+    secondBootDevice: state.vmDialog.get('secondBootDevice'),
+    bootDevices: state.vmDialog.get('bootDevices'),
     errorMessage: state.vmDialog.get('errorMessage'),
   }),
   (dispatch) => ({
     addVm: (vm) =>
-      dispatch(addNewVm(vm)),
+      dispatch(addNewVm({ vm })),
     edit: (vm, vmId) =>
       dispatch(editVm(vm, vmId)),
     changeCluster: (cluster) =>
@@ -510,6 +617,18 @@ export default connect(
       dispatch(updateVmIOThreads(value)),
     changeVmCpu: (cpu) =>
       dispatch(updateVmCpu(cpu)),
+    changeVmConsoleProtocol: (protocol) =>
+      dispatch(updateVmConsoleProtocol(protocol)),
+    changeVmSmartCard: (value) =>
+      dispatch(updateVmSmartCard(value)),
+    changeVmFileTransfer: (value) =>
+      dispatch(updateVmFileTransfer(value)),
+    changeVmCopyPaste: (value) =>
+      dispatch(updateVmCopyPaste(value)),
+    changeVmFirstBootDevice: (value) =>
+      dispatch(updateVmFirstBootDevice(value)),
+    changeVmSecondBootDevice: (value) =>
+      dispatch(updateVmSecondBootDevice(value)),
     closeDialog: () =>
       dispatch(closeDetail()),
     setErrorMessage: (message) =>

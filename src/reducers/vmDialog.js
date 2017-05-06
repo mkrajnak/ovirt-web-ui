@@ -18,6 +18,14 @@ const vmDialogReducer = actionReducer(fromJS({
   startInPauseMode: '',
   deleteProtection: '',
   errorMessage: '',
+  consoleProtocol: '',
+  smartcard: '',
+  fileTransfer: '',
+  copyPaste: '',
+  consoles: {},
+  firstBootDevice: '',
+  secondBootDevice: '',
+  bootDevices: {},
 }), {
   UPDATE_CLUSTER (state, { payload: { cluster } }) {
     return state.set('cluster', fromJS(cluster))
@@ -30,6 +38,30 @@ const vmDialogReducer = actionReducer(fromJS({
   },
   UPDATE_VM_NAME (state, { payload: { name } }) {
     return state.set('name', fromJS(name))
+  },
+  UPDATE_VM_CONSOLES (state, { payload: { consoles } }) {
+    return state.set('consoles', fromJS(consoles))
+  },
+  UPDATE_VM_BOOT_DEVICES (state, { payload: { devices } }) {
+    return state.set('bootDevices', fromJS(devices))
+  },
+  UPDATE_VM_FIRST_BOOT_DEVICE (state, { payload: { value } }) {
+    return state.set('firstBootDevice', fromJS(value))
+  },
+  UPDATE_VM_SECOND_BOOT_DEVICE (state, { payload: { value } }) {
+    return state.set('secondBootDevice', fromJS(value))
+  },
+  UPDATE_VM_SMART_CARD (state, { payload: { value } }) {
+    return state.set('smartcard', fromJS(value))
+  },
+  UPDATE_VM_FILE_TRANSFER (state, { payload: { value } }) {
+    return state.set('fileTransfer', fromJS(value))
+  },
+  UPDATE_VM_COPY_PASTE (state, { payload: { value } }) {
+    return state.set('copyPaste', fromJS(value))
+  },
+  UPDATE_VM_CONSOLE_PROTOCOL (state, { payload: { protocol } }) {
+    return state.set('consoleProtocol', fromJS(protocol))
   },
   UPDATE_VM_DESCRIPTION (state, { payload: { description } }) {
     return state.set('description', fromJS(description))
