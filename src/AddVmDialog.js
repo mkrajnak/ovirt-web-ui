@@ -57,6 +57,7 @@ class vmDialog extends React.Component {
     this.changeVmFirstBootDevice = this.changeVmFirstBootDevice.bind(this)
     this.changeVmSecondBootDevice = this.changeVmSecondBootDevice.bind(this)
     this.clearErrorMessage = this.clearErrorMessage.bind(this)
+    this.checkConsoleProtocol = this.checkConsoleProtocol.bind(this)
   }
 
   componentDidUpdate () {
@@ -64,17 +65,19 @@ class vmDialog extends React.Component {
     $(this.cluster).combobox('refresh')
     $(this.template).combobox('refresh')
     $(this.os).combobox('refresh')
-    if (this.props.consoleProtocol !== 'spice') {
-      $(this.smartcard).bootstrapSwitch('disabled', true)
-      $(this.fileTransfer).bootstrapSwitch('disabled', true)
-      $(this.copyPaste).bootstrapSwitch('disabled', true)
-    } else {
-      $(this.smartcard).bootstrapSwitch('disabled', false)
-      $(this.fileTransfer).bootstrapSwitch('disabled', false)
-      $(this.copyPaste).bootstrapSwitch('disabled', false)
-    }
+    $(this.memoryBallon).bootstrapSwitch()
+    $(this.startInPausedMode).bootstrapSwitch()
+    $(this.deleteProtection).bootstrapSwitch()
+    $(this.memoryBallon).bootstrapSwitch()
+    $(this.highAvailability).bootstrapSwitch()
+    $(this.iothreads).bootstrapSwitch()
+    $(this.smartcard).bootstrapSwitch()
+    $(this.fileTransfer).bootstrapSwitch()
+    $(this.copyPaste).bootstrapSwitch()
+    $(this.graphicsProtocol).selectpicker('refresh')
     $(this.firstBootDevice).selectpicker('refresh')
     $(this.secondBootDevice).selectpicker('refresh')
+    this.checkConsoleProtocol()
   }
 
   componentDidMount () {
@@ -124,6 +127,19 @@ class vmDialog extends React.Component {
     $(this.graphicsProtocol).selectpicker()
     $(this.firstBootDevice).selectpicker()
     $(this.secondBootDevice).selectpicker()
+    this.checkConsoleProtocol()
+  }
+
+  checkConsoleProtocol () {
+    if (this.props.consoleProtocol !== 'spice') {
+      $(this.smartcard).bootstrapSwitch('disabled', true)
+      $(this.fileTransfer).bootstrapSwitch('disabled', true)
+      $(this.copyPaste).bootstrapSwitch('disabled', true)
+    } else {
+      $(this.smartcard).bootstrapSwitch('disabled', false)
+      $(this.fileTransfer).bootstrapSwitch('disabled', false)
+      $(this.copyPaste).bootstrapSwitch('disabled', false)
+    }
   }
 
   getMemory (value) {
@@ -162,6 +178,11 @@ class vmDialog extends React.Component {
         'smartcard_enabled': this.props.smartcard,
       },
       'os': {
+        'boot': {
+          'devices': {
+            'device': this.firstBootDevice.value,
+          },
+        },
         'type': this.os.value,
       },
       'high_availability': {
@@ -182,7 +203,6 @@ class vmDialog extends React.Component {
     if (this.props.type === 'edit') {
       this.props.edit(vm, this.props.vmId)
     } else {
-      console.log(vm)
       this.props.addVm(vm)
     }
   }
@@ -452,7 +472,8 @@ class vmDialog extends React.Component {
                 getValue={(input) => { this.firstBootDevice = input }}
                 onChange={this.changeVmFirstBootDevice}
                 value={this.props.firstBootDevice}
-                data={this.props.bootDevices} />
+                data={this.props.bootDevices}
+                renderer={(item) => item.get('description')} />
 
               <LabeledSelect
                 id='secondBootDevice'
@@ -461,7 +482,8 @@ class vmDialog extends React.Component {
                 onChange={this.changeVmSecondBootDevice}
                 value={this.props.secondBootDevice}
                 data={this.props.bootDevices.toList().filter(device => (
-                  device.get('name') !== this.props.firstBootDevice))} />
+                  device.get('name') !== this.props.firstBootDevice))}
+                renderer={(item) => item.get('description')} />
 
               <div className='form-group'>
                 <div className='col-sm-offset-2 col-sm-10' style={{ 'textAlign': 'right' }}>

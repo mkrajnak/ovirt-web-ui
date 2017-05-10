@@ -183,27 +183,50 @@ OvirtApi = {
     }
   },
   templateToInternal ({ template }) {
-    if (template.cluster) {
-      return {
-        id: template.id,
-        name: template.name,
-        description: template.description,
-        cluster: template.cluster.id,
-        memory: OvirtApi._getVmMemory(template.memory),
-        cpu: template.cpu.topology.sockets,
-        version_number: template.version.version_number,
-        os: template.os.type,
+    function vCpusCount ({ cpu }) {
+      if (cpu && cpu.topology) {
+        const top = cpu.topology
+        let total = top.sockets ? top.sockets : 0
+        total *= (top.cores ? top.cores : 0)
+        total *= (top.threads ? top.threads : 0)
+        return total
       }
+      return 0
     }
     return {
       id: template.id,
       name: template.name,
       description: template.description,
-      cluster: '0',
-      memory: OvirtApi._getVmMemory(template.memory),
-      cpu: template.cpu.topology.sockets,
+      cluster: template.cluster ? template.cluster.id : '0',
       version_number: template.version.version_number,
       os: template.os.type,
+
+      highAvailability: {
+        enabled: template['high_availability'] ? template.high_availability['enabled'] === 'true' : false,
+        priority: template['high_availability'] ? template.high_availability['priority'] : undefined,
+      },
+
+      display: {
+        protocol: template['display'] ? template.display['type'] : 'spice',
+        smartcard: template['display'] ? template.display['copy_paste_enabled'] === 'true' : false,
+        fileTransfer: template['display'] ? template.display['file_transfer_enabled'] === 'true' : false,
+        copyPaste: template['display'] ? template.display['smartcard_enabled'] === 'true' : false,
+      },
+
+      memory: {
+        total: OvirtApi._getVmMemory(template['memory']),
+        guaranteed: template['memory_policy'] ? OvirtApi._getVmMemory(template.memory_policy['guaranteed']) : undefined,
+        max: template['memory_policy'] ? OvirtApi._getVmMemory(template.memory_policy['max']) : undefined,
+        balloon: template['memory_policy'] ? template.memory_policy['ballooning'] === 'true' : false,
+      },
+
+      cpu: {
+        arch: template['cpu'] ? template.cpu['architecture'] : undefined,
+        vCPUs: vCpusCount({ cpu: template['cpu'] }),
+      },
+      startPaused: template['start_paused'] === 'true',
+      deleteProtection: template['delete_protected'] === 'true',
+      IOThreads: template['io'] ? template.io['threads'] : '0',
     }
   },
   clusterToInternal ({ cluster }) {

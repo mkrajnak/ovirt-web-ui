@@ -299,6 +299,8 @@ function* showEditVm (action) {
   const vm = yield Selectors.getVmById(action.payload.vm.get('id'))
 
   if (vm) {
+    yield put(openVmDialog())
+    yield put(setVmDetailToShow({ vmId: vm.get('id') }))
     yield put(updateDialogType('edit'))
     const cluster = Selectors.getClusterById(vm.get('cluster').get('id'))
     yield put(updateCluster(cluster))
@@ -333,15 +335,18 @@ function* showEditVm (action) {
     yield put(updateVmBootDevices([
       {
         id: '0',
-        name: 'Network (PXE)',
+        name: 'network',
+        description: 'Network (PXE)',
       },
       {
         id: '1',
-        name: 'Hard-Disk',
+        name: 'hd',
+        description: 'Hard-Disk',
       },
       {
         id: '3',
-        name: 'CD-ROM',
+        name: 'cdrom',
+        description: 'CD-ROM',
       },
     ],
     ))
@@ -356,14 +361,13 @@ function* showEditVm (action) {
     yield put(updateVmMemory(vm.get('memory').get('total')))
 
     yield put(updateVmCpu(vm.get('cpu').get('vCPUs')))
-    yield put(openVmDialog())
-    yield put(setVmDetailToShow({ vmId: vm.get('id') }))
   }
 }
 
 function* showAddNewVm (action) {
-  yield put(setVmDetailToShow({ vmId: '0' }))
   yield put(updateDialogType('create'))
+  yield put(openVmDialog())
+  yield put(setVmDetailToShow({ vmId: '0' }))
   const cluster = Selectors.getFirstCluster()
   yield put(changeCluster(cluster))
   yield put(updateVmId('0'))
@@ -391,25 +395,26 @@ function* showAddNewVm (action) {
   yield put(updateVmBootDevices([
     {
       id: '0',
-      name: 'Network (PXE)',
+      name: 'network',
+      description: 'Network (PXE)',
     },
     {
       id: '1',
-      name: 'Hard-Disk',
+      name: 'hd',
+      description: 'Hard-Disk',
     },
     {
       id: '3',
-      name: 'CD-ROM',
+      name: 'cdrom',
+      description: 'CD-ROM',
     },
   ],
   ))
-  yield put(updateVmFirstBootDevice('Network (PXE)'))
+  yield put(updateVmFirstBootDevice('network'))
   yield put(updateVmConsoleProtocol('spice'))
   yield put(updateVmIOThreads(false))
   yield put(updateVmMemoryMax(''))
   yield put(updateVmMemoryGuaranteed(''))
-
-  yield put(openVmDialog())
 }
 
 function* handleClusterChange (action) {
@@ -422,11 +427,19 @@ function* handleClusterChange (action) {
 function* handleTemplateChange (action) {
   const template = action.payload.template
   yield put(updateTemplate(template))
-  yield put(updateVmMemory(template.get('memory')))
-  yield put(updateVmCpu(template.get('cpu')))
-
   const os = Selectors.getOperatingSystemByName(template.get('os'))
   yield put(updateOperatingSystem(os))
+
+  yield put(updateVmCopyPaste(template.get('display').get('copyPaste')))
+  yield put(updateVmFileTransfer(template.get('display').get('fileTransfer')))
+  yield put(updateVmSmartCard(template.get('display').get('smartcard')))
+  yield put(updateVmConsoleProtocol(template.get('display').get('protocol')))
+
+  yield put(updateVmMemoryBalloon(template.get('memory').get('balloon')))
+  yield put(updateVmMemoryMax(template.get('memory').get('max')))
+  yield put(updateVmMemoryGuaranteed(template.get('memory').get('guaranteed')))
+  yield put(updateVmMemory(template.get('memory').get('total')))
+  yield put(updateVmCpu(template.get('cpu').get('vCPUs')))
 }
 
 function* handleEditTemplateChange (action) {
