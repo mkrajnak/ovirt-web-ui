@@ -299,7 +299,6 @@ function* showEditVm (action) {
   const vm = yield Selectors.getVmById(action.payload.vm.get('id'))
 
   if (vm) {
-    yield put(openVmDialog())
     yield put(setVmDetailToShow({ vmId: vm.get('id') }))
     yield put(updateDialogType('edit'))
     const cluster = Selectors.getClusterById(vm.get('cluster').get('id'))
@@ -361,12 +360,13 @@ function* showEditVm (action) {
     yield put(updateVmMemory(vm.get('memory').get('total')))
 
     yield put(updateVmCpu(vm.get('cpu').get('vCPUs')))
+    yield put(updateVmFirstBootDevice('network'))
+    yield put(openVmDialog())
   }
 }
 
 function* showAddNewVm (action) {
   yield put(updateDialogType('create'))
-  yield put(openVmDialog())
   yield put(setVmDetailToShow({ vmId: '0' }))
   const cluster = Selectors.getFirstCluster()
   yield put(changeCluster(cluster))
@@ -415,6 +415,7 @@ function* showAddNewVm (action) {
   yield put(updateVmIOThreads(false))
   yield put(updateVmMemoryMax(''))
   yield put(updateVmMemoryGuaranteed(''))
+  yield put(openVmDialog())
 }
 
 function* handleClusterChange (action) {
@@ -602,15 +603,15 @@ export function *rootSaga () {
     takeLatest('GET_ALL_TEMPLATES', fetchAllTemplates),
     takeLatest('GET_ALL_OS', fetchAllOS),
     takeLatest('PERSIST_STATE', persistStateSaga),
+    takeLatest('SHOW_EDIT_VM', showEditVm),
+    takeLatest('SHOW_EDIT_TEMPLATE', showEditTemplate),
+    takeLatest('SHOW_BLANK_DIALOG', showAddNewVm),
 
     takeEvery('SHUTDOWN_VM', shutdownVm),
     takeEvery('RESTART_VM', restartVm),
     takeEvery('START_VM', startVm),
     takeEvery('GET_CONSOLE_VM', getConsoleVm),
     takeEvery('SUSPEND_VM', suspendVm),
-    takeEvery('SHOW_EDIT_VM', showEditVm),
-    takeEvery('SHOW_EDIT_TEMPLATE', showEditTemplate),
-    takeEvery('SHOW_BLANK_DIALOG', showAddNewVm),
     takeEvery('CHANGE_CLUSTER', handleClusterChange),
     takeEvery('CHANGE_TEMPLATE', handleTemplateChange),
     takeEvery('CHANGE_EDIT_TEMPLATE', handleEditTemplateChange),
