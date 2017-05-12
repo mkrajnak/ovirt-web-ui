@@ -58,6 +58,7 @@ import {
   updateEditTemplateOS,
   updateEditTemplateMemory,
   updateEditTemplateCpu,
+  openEditTemplate,
   openVmDialog,
   closeVmDialog,
   openVmDetail,
@@ -454,6 +455,7 @@ function* handleEditTemplateChange (action) {
 }
 
 function* showEditTemplate () {
+  yield put(openEditTemplate())
   yield put(setVmDetailToShow({ vmId: '0' }))
 }
 

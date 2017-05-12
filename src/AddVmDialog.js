@@ -178,11 +178,6 @@ class vmDialog extends React.Component {
         'smartcard_enabled': this.props.smartcard,
       },
       'os': {
-        'boot': {
-          'devices': {
-            'device': this.firstBootDevice.value,
-          },
-        },
         'type': this.os.value,
       },
       'high_availability': {

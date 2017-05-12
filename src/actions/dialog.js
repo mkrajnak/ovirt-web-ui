@@ -314,6 +314,14 @@ export function openEditTemplate () {
   }
 }
 
+export function showEditTemplate () {
+  return {
+    type: 'SHOW_EDIT_TEMPLATE',
+    payload: {
+    },
+  }
+}
+
 export function closeEditTemplate () {
   return {
     type: 'CLOSE_EDIT_TEMPLATE',
