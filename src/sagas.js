@@ -53,6 +53,7 @@ import {
   updateVmSmartCard,
   updateVmBootDevices,
   updateVmFirstBootDevice,
+  updateVmSecondBootDevice,
   updateEditTemplateName,
   updateEditTemplateDescription,
   updateEditTemplateOS,
@@ -335,17 +336,17 @@ function* showEditVm (action) {
     yield put(updateVmBootDevices([
       {
         id: '0',
-        name: 'network',
+        name: 'NETWORK',
         description: 'Network (PXE)',
       },
       {
         id: '1',
-        name: 'hd',
+        name: 'HD',
         description: 'Hard-Disk',
       },
       {
-        id: '3',
-        name: 'cdrom',
+        id: '2',
+        name: 'CDROM',
         description: 'CD-ROM',
       },
     ],
@@ -361,7 +362,7 @@ function* showEditVm (action) {
     yield put(updateVmMemory(vm.get('memory').get('total')))
 
     yield put(updateVmCpu(vm.get('cpu').get('vCPUs')))
-    yield put(updateVmFirstBootDevice('network'))
+    yield put(updateVmFirstBootDevice('NETWORK'))
     yield put(openVmDialog())
   }
 }
@@ -396,22 +397,23 @@ function* showAddNewVm (action) {
   yield put(updateVmBootDevices([
     {
       id: '0',
-      name: 'network',
+      name: 'NETWORK',
       description: 'Network (PXE)',
     },
     {
       id: '1',
-      name: 'hd',
+      name: 'HD',
       description: 'Hard-Disk',
     },
     {
-      id: '3',
-      name: 'cdrom',
+      id: '2',
+      name: 'CDROM',
       description: 'CD-ROM',
     },
   ],
   ))
-  yield put(updateVmFirstBootDevice('network'))
+  yield put(updateVmFirstBootDevice('NETWORK'))
+  yield put(updateVmSecondBootDevice('HD'))
   yield put(updateVmConsoleProtocol('spice'))
   yield put(updateVmIOThreads(false))
   yield put(updateVmMemoryMax(''))

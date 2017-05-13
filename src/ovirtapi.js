@@ -15,10 +15,12 @@ OvirtApi = {
       throw new Exception(`OvirtApi in '${methodName}': missing login`)
     }
   },
-  _httpGet ({ url, custHeaders = { 'Accept': 'application/json', Filter: true } }) {
+  _httpGet ({ url, custHeaders = {} }) {
     logDebug(`_httpGet start: url="${url}"`)
     const headers = Object.assign({
       'Authorization': `Bearer ${OvirtApi._getLoginToken()}`,
+      'Accept': 'application/json',
+      'Filter': true,
     }, custHeaders)
     logDebug(`_httpGet: url="${url}", headers="${JSON.stringify(headers)}"`)
 
@@ -278,7 +280,9 @@ OvirtApi = {
   getVm ({ vmId }) {
     OvirtApi._assertLogin({ methodName: 'getVm' })
     const url = `${AppConfiguration.applicationContext}/api/vms/${vmId}`
-    return OvirtApi._httpGet({ url })
+    // Custom header is required to fetll all the VM data
+    const custHeaders = { 'All-content': true }
+    return OvirtApi._httpGet({ url, custHeaders })
   },
   getAllVms () {
     OvirtApi._assertLogin({ methodName: 'getAllVms' })
