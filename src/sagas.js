@@ -362,7 +362,8 @@ function* showEditVm (action) {
     yield put(updateVmMemory(vm.get('memory').get('total')))
 
     yield put(updateVmCpu(vm.get('cpu').get('vCPUs')))
-    yield put(updateVmFirstBootDevice('NETWORK'))
+    yield put(updateVmFirstBootDevice(vm.get('firstBootDevice')))
+    yield put(updateVmSecondBootDevice(vm.get('secondBootDevice')))
     yield put(openVmDialog())
   }
 }
@@ -386,11 +387,13 @@ function* showAddNewVm (action) {
   yield put(updateVmConsoles([
     {
       id: '0',
-      protocol: 'spice',
+      name: 'spice',
+      description: 'SPICE',
     },
     {
       id: '1',
-      protocol: 'vnc',
+      name: 'vnc',
+      description: 'VNC',
     },
   ],
   ))

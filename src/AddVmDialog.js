@@ -198,9 +198,13 @@ class vmDialog extends React.Component {
           'threads': '1',
         },
       },
+      'virtio_scsi': {
+        'enabled': true,
+      },
       'io': {
         'threads': this.getThreads(),
       },
+      'soundcard_enabled': true,
     }
 
     if (this.props.type === 'edit') {
@@ -446,7 +450,7 @@ class vmDialog extends React.Component {
                 onChange={this.changeVmConsoleProtocol}
                 value={this.props.consoleProtocol}
                 data={this.props.consoles}
-                renderer={(item) => item.get('protocol')} />
+                renderer={(item) => item.get('description')} />
 
               <LabeledSwitch
                 getValue={(input) => { this.smartcard = input }}
@@ -474,7 +478,7 @@ class vmDialog extends React.Component {
                 label='First device'
                 getValue={(input) => { this.firstBootDevice = input }}
                 onChange={this.changeVmFirstBootDevice}
-                value={this.props.firstBootDevice}
+                value={this.props.firstBootDevice.toUpperCase()}
                 data={this.props.bootDevices}
                 renderer={(item) => item.get('description')} />
 
@@ -483,7 +487,7 @@ class vmDialog extends React.Component {
                 label='Second device'
                 getValue={(input) => { this.secondBootDevice = input }}
                 onChange={this.changeVmSecondBootDevice}
-                value={this.props.secondBootDevice}
+                value={this.props.secondBootDevice.toUpperCase()}
                 data={this.props.bootDevices.toList().filter(device => (
                   device.get('name') !== this.props.firstBootDevice))}
                 renderer={(item) => item.get('description')} />

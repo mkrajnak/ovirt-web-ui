@@ -55,6 +55,7 @@ OvirtApi = {
       headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
+        'All-content': true,
         'Authorization': `Bearer ${OvirtApi._getLoginToken()}`,
       },
       data: input,
@@ -157,6 +158,8 @@ OvirtApi = {
       deleteProtection: vm['delete_protected'] === 'true',
       IOThreads: vm['io'] ? vm.io['threads'] : '0',
       comment: vm['comment'],
+      firstBootDevice: vm['os'] && vm.os['boot'] && vm.os.boot && vm.os.boot.devices['device'] && vm.os.boot.devices.device[0] ? vm.os.boot.devices.device[0] : '',
+      secondBootDevice: vm['os'] && vm.os['boot'] && vm.os.boot && vm.os.boot.devices['device'] && vm.os.boot.devices.device[1] ? vm.os.boot.devices.device[1] : '',
     }
   },
   /**
