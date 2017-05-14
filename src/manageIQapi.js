@@ -2,7 +2,7 @@ import $ from 'jquery'
 
 import { logDebug } from 'ovirt-ui-components'
 
-const serverUrl = 'https://10.34.60.107/'
+const serverUrl = 'https://10.34.61.27/'
 let OvirtApi = {}
 OvirtApi = {
   _httpGet ({ url }) {
