@@ -34,6 +34,8 @@ import {
   updateVmHighAvailability,
   updateVmCpu,
   updateVmDialogErrorMessage,
+  updateVmSoundCard,
+  updateVmVirtualSCSI,
 } from './actions'
 
 class vmDialog extends React.Component {
@@ -56,6 +58,8 @@ class vmDialog extends React.Component {
     this.changeVmConsoleProtocol = this.changeVmConsoleProtocol.bind(this)
     this.changeVmFirstBootDevice = this.changeVmFirstBootDevice.bind(this)
     this.changeVmSecondBootDevice = this.changeVmSecondBootDevice.bind(this)
+    this.changeVmSoundCard = this.changeVmSoundCard.bind(this)
+    this.changeVmVirtualSCSI = this.changeVmVirtualSCSI.bind(this)
     this.clearErrorMessage = this.clearErrorMessage.bind(this)
     this.checkConsoleProtocol = this.checkConsoleProtocol.bind(this)
   }
@@ -65,15 +69,16 @@ class vmDialog extends React.Component {
     $(this.cluster).combobox('refresh')
     $(this.template).combobox('refresh')
     $(this.os).combobox('refresh')
-    $(this.memoryBallon).bootstrapSwitch()
-    $(this.startInPausedMode).bootstrapSwitch()
-    $(this.deleteProtection).bootstrapSwitch()
-    $(this.memoryBallon).bootstrapSwitch()
-    $(this.highAvailability).bootstrapSwitch()
-    $(this.iothreads).bootstrapSwitch()
-    $(this.smartcard).bootstrapSwitch()
-    $(this.fileTransfer).bootstrapSwitch()
-    $(this.copyPaste).bootstrapSwitch()
+    $(this.memoryBallon).bootstrapSwitch('state', this.props.memoryBalloon)
+    $(this.startInPausedMode).bootstrapSwitch('state', this.props.startInPausedMode)
+    $(this.deleteProtection).bootstrapSwitch('state', this.props.deleteProtection)
+    $(this.highAvailability).bootstrapSwitch('state', this.props.highAvailability)
+    $(this.iothreads).bootstrapSwitch('state', this.props.iothreads)
+    $(this.smartcard).bootstrapSwitch('state', this.props.smartcard)
+    $(this.fileTransfer).bootstrapSwitch('state', this.props.fileTransfer)
+    $(this.copyPaste).bootstrapSwitch('state', this.props.copyPaste)
+    $(this.soundCard).bootstrapSwitch('state', this.props.soundCard)
+    $(this.virtualSCSI).bootstrapSwitch('state', this.props.virtualSCSI)
     $(this.graphicsProtocol).selectpicker('refresh')
     $(this.firstBootDevice).selectpicker('refresh')
     $(this.secondBootDevice).selectpicker('refresh')
@@ -123,6 +128,14 @@ class vmDialog extends React.Component {
     $(this.copyPaste).bootstrapSwitch()
     $(this.copyPaste).on('switchChange.bootstrapSwitch',
       (event, state) => $(this.props.changeVmCopyPaste(state)))
+
+    $(this.soundCard).bootstrapSwitch()
+    $(this.soundCard).on('switchChange.bootstrapSwitch',
+      (event, state) => $(this.props.changeVmSoundCard(state)))
+
+    $(this.virtualSCSI).bootstrapSwitch()
+    $(this.virtualSCSI).on('switchChange.bootstrapSwitch',
+      (event, state) => $(this.props.changeVmVirtualSCSI(state)))
 
     $(this.graphicsProtocol).selectpicker()
     $(this.firstBootDevice).selectpicker()
@@ -181,8 +194,8 @@ class vmDialog extends React.Component {
         'boot': {
           'devices': {
             'device': [
-              this.props.firstBootDevice,
-              this.props.secondBootDevice,
+              this.firstBootDevice.value,
+              this.secondBootDevice.value,
             ],
           },
         },
@@ -199,12 +212,12 @@ class vmDialog extends React.Component {
         },
       },
       'virtio_scsi': {
-        'enabled': true,
+        'enabled': this.props.virtualSCSI,
       },
       'io': {
         'threads': this.getThreads(),
       },
-      'soundcard_enabled': true,
+      'soundcard_enabled': this.props.soundCard,
     }
 
     if (this.props.type === 'edit') {
@@ -290,6 +303,14 @@ class vmDialog extends React.Component {
 
   changeVmSecondBootDevice () {
     this.props.changeVmSecondBootDevice(this.secondBootDevice.value)
+  }
+
+  changeVmSoundCard () {
+    this.props.changeVmSoundCard(this.soundCard.value)
+  }
+
+  changeVmVirtualSCSI () {
+    this.props.changeVmVirtualSCSI(this.virtualSCSI.value)
   }
 
   clearErrorMessage (entity) {
@@ -429,19 +450,8 @@ class vmDialog extends React.Component {
                 value={this.props.startInPausedMode}
                 setValue={this.props.changeVmStartInPausedMode} />
 
-              <LabeledSwitch
-                getValue={(input) => { this.iothreads = input }}
-                id='iothreads'
-                label='IO Threads'
-                value={parseInt(this.props.iothreads) > 0}
-                setValue={this.props.changeVmIOThreads} />
-
-              <LabeledSwitch
-                getValue={(input) => { this.highAvailability = input }}
-                id='highAvailability'
-                label='High Availability'
-                value={this.props.highAvailability}
-                setValue={this.props.changeVmHighAvailability} />
+              <hr />
+              <h3>Console</h3>
 
               <LabeledSelect
                 id='graphicsProtocol'
@@ -473,12 +483,14 @@ class vmDialog extends React.Component {
                 value={this.props.copyPaste}
                 setValue={this.props.changeVmCopyPaste} />
 
+              <hr />
+              <h3>Boot order</h3>
               <LabeledSelect
                 id='firstBootDevice'
                 label='First device'
                 getValue={(input) => { this.firstBootDevice = input }}
                 onChange={this.changeVmFirstBootDevice}
-                value={this.props.firstBootDevice.toUpperCase()}
+                value={this.props.firstBootDevice}
                 data={this.props.bootDevices}
                 renderer={(item) => item.get('description')} />
 
@@ -487,10 +499,40 @@ class vmDialog extends React.Component {
                 label='Second device'
                 getValue={(input) => { this.secondBootDevice = input }}
                 onChange={this.changeVmSecondBootDevice}
-                value={this.props.secondBootDevice.toUpperCase()}
+                value={this.props.secondBootDevice}
                 data={this.props.bootDevices.toList().filter(device => (
                   device.get('name') !== this.props.firstBootDevice))}
                 renderer={(item) => item.get('description')} />
+
+              <hr />
+              <h3>Other hardware</h3>
+              <LabeledSwitch
+                getValue={(input) => { this.soundCard = input }}
+                id='soundCard'
+                label='Sound Card'
+                value={this.props.soundCard}
+                setValue={this.props.changeVmSoundCard} />
+
+              <LabeledSwitch
+                getValue={(input) => { this.virtualSCSI = input }}
+                id='virtualSCSI'
+                label='Virtual SCSCI'
+                value={this.props.virtualSCSI}
+                setValue={this.props.changeVmVirtualSCSI} />
+
+              <LabeledSwitch
+                getValue={(input) => { this.iothreads = input }}
+                id='iothreads'
+                label='IO Threads'
+                value={parseInt(this.props.iothreads) > 0}
+                setValue={this.props.changeVmIOThreads} />
+
+              <LabeledSwitch
+                getValue={(input) => { this.highAvailability = input }}
+                id='highAvailability'
+                label='High Availability'
+                value={this.props.highAvailability}
+                setValue={this.props.changeVmHighAvailability} />
 
               <div className='form-group'>
                 <div className='col-sm-offset-2 col-sm-10' style={{ 'textAlign': 'right' }}>
@@ -548,6 +590,8 @@ vmDialog.propTypes = {
   secondBootDevice: PropTypes.string,
   bootDevices: PropTypes.object,
   highAvailability: PropTypes.bool,
+  soundCard: PropTypes.bool,
+  virtualSCSI: PropTypes.bool,
   vmComment: PropTypes.string,
   vmId: PropTypes.string.isRequired,
   changeCluster: PropTypes.func.isRequired,
@@ -568,6 +612,8 @@ vmDialog.propTypes = {
   changeVmConsoleProtocol: PropTypes.func.isRequired,
   changeVmFirstBootDevice: PropTypes.func.isRequired,
   changeVmSecondBootDevice: PropTypes.func.isRequired,
+  changeVmSoundCard: PropTypes.func.isRequired,
+  changeVmVirtualSCSI: PropTypes.func.isRequired,
   changeVmSmartCard: PropTypes.func.isRequired,
   changeVmFileTransfer: PropTypes.func.isRequired,
   changeVmCopyPaste: PropTypes.func.isRequired,
@@ -609,6 +655,8 @@ export default connect(
     firstBootDevice: state.vmDialog.get('firstBootDevice'),
     secondBootDevice: state.vmDialog.get('secondBootDevice'),
     bootDevices: state.vmDialog.get('bootDevices'),
+    soundCard: state.vmDialog.get('soundCard'),
+    virtualSCSI: state.vmDialog.get('virtualSCSI'),
     errorMessage: state.vmDialog.get('errorMessage'),
   }),
   (dispatch) => ({
@@ -658,6 +706,10 @@ export default connect(
       dispatch(updateVmFirstBootDevice(value)),
     changeVmSecondBootDevice: (value) =>
       dispatch(updateVmSecondBootDevice(value)),
+    changeVmSoundCard: (value) =>
+      dispatch(updateVmSoundCard(value)),
+    changeVmVirtualSCSI: (value) =>
+      dispatch(updateVmVirtualSCSI(value)),
     closeDialog: () =>
       dispatch(closeDetail()),
     setErrorMessage: (message) =>

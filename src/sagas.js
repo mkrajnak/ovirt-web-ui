@@ -54,6 +54,8 @@ import {
   updateVmBootDevices,
   updateVmFirstBootDevice,
   updateVmSecondBootDevice,
+  updateVmSoundCard,
+  updateVmVirtualSCSI,
   updateEditTemplateName,
   updateEditTemplateDescription,
   updateEditTemplateOS,
@@ -325,11 +327,13 @@ function* showEditVm (action) {
     yield put(updateVmConsoles([
       {
         id: '0',
-        protocol: 'spice',
+        name: 'spice',
+        description: 'SPICE',
       },
       {
         id: '1',
-        protocol: 'vnc',
+        name: 'vnc',
+        description: 'VNC',
       },
     ],
     ))
@@ -360,6 +364,8 @@ function* showEditVm (action) {
     yield put(updateVmMemoryMax(vm.get('memory').get('max')))
     yield put(updateVmMemoryGuaranteed(vm.get('memory').get('guaranteed')))
     yield put(updateVmMemory(vm.get('memory').get('total')))
+    yield put(updateVmSoundCard(vm.get('soundCard')))
+    yield put(updateVmVirtualSCSI(vm.get('virtualSCSI')))
 
     yield put(updateVmCpu(vm.get('cpu').get('vCPUs')))
     yield put(updateVmFirstBootDevice(vm.get('firstBootDevice')))
@@ -384,6 +390,8 @@ function* showAddNewVm (action) {
   yield put(updateVmCopyPaste(false))
   yield put(updateVmFileTransfer(false))
   yield put(updateVmSmartCard(false))
+  yield put(updateVmSoundCard(false))
+  yield put(updateVmVirtualSCSI(false))
   yield put(updateVmConsoles([
     {
       id: '0',
@@ -447,19 +455,30 @@ function* handleTemplateChange (action) {
   yield put(updateVmMemoryGuaranteed(template.get('memory').get('guaranteed')))
   yield put(updateVmMemory(template.get('memory').get('total')))
   yield put(updateVmCpu(template.get('cpu').get('vCPUs')))
+
+  yield put(updateVmSoundCard(template.get('soundCard')))
+  yield put(updateVmVirtualSCSI(template.get('virtualSCSI')))
+  yield put(updateVmFirstBootDevice(template.get('firstBootDevice')))
+  yield put(updateVmSecondBootDevice(template.get('secondBootDevice')))
 }
 
 function* handleEditTemplateChange (action) {
   const template = action.payload.template
   yield put(updateEditTemplate(template))
   yield put(updateEditTemplateName(template.get('name')))
-  yield put(updateEditTemplateMemory(template.get('memory')))
-  yield put(updateEditTemplateCpu(template.get('cpu')))
+  yield put(updateEditTemplateMemory(template.get('memory').get('total')))
+  yield put(updateEditTemplateCpu(template.get('cpu').get('vCPUs')))
   yield put(updateEditTemplateDescription(template.get('description')))
   yield put(updateEditTemplateOS(template.get('os')))
 }
 
 function* showEditTemplate () {
+  const blankTemplate = Selectors.getTemplateById('00000000-0000-0000-0000-000000000000')
+  yield put(updateEditTemplate(blankTemplate))
+  yield put(updateEditTemplateCpu(blankTemplate.get('cpu').get('vCPUs')))
+  yield put(updateEditTemplateDescription(blankTemplate.get('description')))
+  yield put(updateEditTemplateMemory(blankTemplate.get('memory').get('total')))
+  yield put(updateEditTemplateErrorMessage(''))
   yield put(openEditTemplate())
   yield put(setVmDetailToShow({ vmId: '0' }))
 }
@@ -555,7 +574,7 @@ function* editTemplate (action) {
     yield put(updateEditTemplateErrorMessage(msg.replace(/^\[|\]$/mg, '')))
   } else {
     yield put(closeDetail())
-    yield put(getAllVms({ shallowFetch: false }))
+    yield put(getAllTemplates({ shallowFetch: false }))
   }
 }
 
@@ -572,7 +591,6 @@ function* fetchAllTemplates (action) {
     yield put(updateVmCpu(activeTemplate.cpu))
     yield put(updateVmName(''))
     // update template in store for edit template dialog
-    yield put(updateEditTemplate(activeTemplate))
   }
 }
 

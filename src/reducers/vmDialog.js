@@ -25,6 +25,8 @@ const vmDialogReducer = actionReducer(fromJS({
   consoles: {},
   firstBootDevice: '',
   secondBootDevice: '',
+  soundCard: '',
+  virtualSCSI: '',
   bootDevices: {},
 }), {
   UPDATE_CLUSTER (state, { payload: { cluster } }) {
@@ -50,6 +52,12 @@ const vmDialogReducer = actionReducer(fromJS({
   },
   UPDATE_VM_SECOND_BOOT_DEVICE (state, { payload: { value } }) {
     return state.set('secondBootDevice', fromJS(value))
+  },
+  UPDATE_VM_SOUND_CARD (state, { payload: { value } }) {
+    return state.set('soundCard', fromJS(value))
+  },
+  UPDATE_VM_VIRTUAL_SCSI (state, { payload: { value } }) {
+    return state.set('virtualSCSI', fromJS(value))
   },
   UPDATE_VM_SMART_CARD (state, { payload: { value } }) {
     return state.set('smartcard', fromJS(value))

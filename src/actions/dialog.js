@@ -203,6 +203,24 @@ export function updateVmFirstBootDevice (value) {
   }
 }
 
+export function updateVmSoundCard (value) {
+  return {
+    type: 'UPDATE_VM_SOUND_CARD',
+    payload: {
+      value,
+    },
+  }
+}
+
+export function updateVmVirtualSCSI (value) {
+  return {
+    type: 'UPDATE_VM_VIRTUAL_SCSI',
+    payload: {
+      value,
+    },
+  }
+}
+
 export function updateVmSecondBootDevice (value) {
   return {
     type: 'UPDATE_VM_SECOND_BOOT_DEVICE',

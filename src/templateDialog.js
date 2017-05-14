@@ -5,6 +5,7 @@ import $ from 'jquery'
 import LabeledSelect from './LabeledSelect'
 import LabeledTextField from './LabeledTextField'
 import DetailContainer from './components/DetailContainer'
+import ErrorAlert from './ErrorAlert'
 import {
   updateEditTemplateName,
   updateEditTemplateDescription,
@@ -29,6 +30,7 @@ class templateDialog extends React.Component {
     this.closeDialog = this.closeDialog.bind(this)
     this.getTemplate = this.getTemplate.bind(this)
     this.getOperatingSystem = this.getOperatingSystem.bind(this)
+    this.getMemory = this.getMemory.bind(this)
   }
 
   componentDidUpdate () {
@@ -81,12 +83,16 @@ class templateDialog extends React.Component {
     this.props.closeDialog()
   }
 
+  getMemory (value) {
+    return value === '' ? '' : parseInt(value) * 1048576
+  }
+
   editTemplate (e) {
     e.preventDefault()
     const template = {
       'name': this.templateName.value,
       'description': this.templateDescription.value,
-      'memory': this.templateMemory.value,
+      'memory': this.getMemory(this.templateMemory.value),
       'cpu': {
         'topology': {
           'cores': '1',
@@ -98,7 +104,7 @@ class templateDialog extends React.Component {
         'type': this.templateOs.value,
       },
     }
-    this.props.editTemplate(template, this.props.template.get('id'))
+    this.props.editTemplate(template, this.props.id)
   }
 
   render () {
@@ -107,11 +113,12 @@ class templateDialog extends React.Component {
         <h1>Edit Template</h1>
         <hr />
         <form className='form-horizontal'>
+          <ErrorAlert message={this.props.errorMessage} />
           <LabeledSelect
             label='Templates'
             getValue={(input) => { this.template = input }}
             onChange={this.changeTemplate}
-            value={this.props.template.get('name')}
+            value={this.props.name}
             data={this.props.templates.get('templates').toList()} />
 
           <LabeledTextField
@@ -119,23 +126,23 @@ class templateDialog extends React.Component {
             getValue={(input) => { this.templateName = input }}
             id='templateName'
             placeholder='Template name'
-            value={this.props.template.get('name')}
+            value={this.props.name}
             setValue={this.changeName}
-            disabled={this.props.template.get('version_number') !== '1'} />
+            disabled={this.props.name === 'Blank'} />
 
           <LabeledTextField
             label='Description'
             getValue={(input) => { this.templateDescription = input }}
             id='templateDescription'
             placeholder='Template Description'
-            value={this.props.template.get('description')}
+            value={this.props.description}
             setValue={this.changeDescription} />
 
           <LabeledSelect
             label='Operating System'
             getValue={(input) => { this.templateOs = input }}
             onChange={this.changeOperatingSystem}
-            value={this.props.template.get('os')}
+            value={this.props.os}
             data={this.props.operatingSystems.get('operatingSystems')}
             renderer={(item) => item.get('description')} />
 
@@ -145,7 +152,7 @@ class templateDialog extends React.Component {
             id='templateMemory'
             label='Memory'
             placeholder='Template Memory'
-            value={this.props.template.get('memory')}
+            value={this.props.memory}
             setValue={this.changeMemory} />
 
           <LabeledTextField
@@ -154,7 +161,7 @@ class templateDialog extends React.Component {
             id='templateCpu'
             label='CPU'
             placeholder='CPUs'
-            value={this.props.template.get('cpu')}
+            value={this.props.cpu}
             setValue={this.changeCpu} />
 
           <div className='form-group'>
@@ -172,7 +179,19 @@ class templateDialog extends React.Component {
 templateDialog.propTypes = {
   templates: PropTypes.object.isRequired,
   operatingSystems: PropTypes.object.isRequired,
-  template: PropTypes.object.isRequired,
+  os: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
+  cpu: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
+  memory: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
+  name: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+  errorMessage: PropTypes.string,
   changeTemplate: PropTypes.func.isRequired,
   changeName: PropTypes.func.isRequired,
   changeDescription: PropTypes.func.isRequired,
@@ -187,7 +206,13 @@ export default connect(
   (state) => ({
     templates: state.templates,
     operatingSystems: state.operatingSystems,
-    template: state.editTemplate,
+    id: state.editTemplate.get('id'),
+    name: state.editTemplate.get('name'),
+    description: state.editTemplate.get('description'),
+    os: state.editTemplate.get('os'),
+    memory: state.editTemplate.get('memory'),
+    cpu: state.editTemplate.get('cpu'),
+    errorMessage: state.editTemplate.get('errorMessage'),
   }),
   (dispatch) => ({
     changeName: (template) =>

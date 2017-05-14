@@ -6,6 +6,7 @@ const editTemplateReducer = actionReducer(fromJS({
   cluster: '',
   os: '',
   name: '',
+  description: '',
   memory: '',
   cpu: '',
   errorMessage: '',

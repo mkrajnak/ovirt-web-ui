@@ -158,8 +158,10 @@ OvirtApi = {
       deleteProtection: vm['delete_protected'] === 'true',
       IOThreads: vm['io'] ? vm.io['threads'] : '0',
       comment: vm['comment'],
-      firstBootDevice: vm['os'] && vm.os['boot'] && vm.os.boot && vm.os.boot.devices['device'] && vm.os.boot.devices.device[0] ? vm.os.boot.devices.device[0] : '',
-      secondBootDevice: vm['os'] && vm.os['boot'] && vm.os.boot && vm.os.boot.devices['device'] && vm.os.boot.devices.device[1] ? vm.os.boot.devices.device[1] : '',
+      firstBootDevice: vm['os'] && vm.os['boot'] && vm.os.boot && vm.os.boot.devices['device'] && vm.os.boot.devices.device[0] ? vm.os.boot.devices.device[0].toUpperCase() : '',
+      secondBootDevice: vm['os'] && vm.os['boot'] && vm.os.boot && vm.os.boot.devices['device'] && vm.os.boot.devices.device[1] ? vm.os.boot.devices.device[1].toUpperCase() : '',
+      soundCard: vm['soundcard_enabled'] ? vm['soundcard_enabled'] === 'true' : false,
+      virtualSCSI: vm['virtio_scsi'] && vm.virtio_scsi['enabled'] ? vm.virtio_scsi['enabled'] === 'true' : false,
     }
   },
   /**
@@ -232,6 +234,10 @@ OvirtApi = {
       startPaused: template['start_paused'] === 'true',
       deleteProtection: template['delete_protected'] === 'true',
       IOThreads: template['io'] ? template.io['threads'] : '0',
+      firstBootDevice: template['os'] && template.os['boot'] && template.os.boot && template.os.boot.devices['device'] && template.os.boot.devices.device[0] ? template.os.boot.devices.device[0].toUpperCase() : '',
+      secondBootDevice: template['os'] && template.os['boot'] && template.os.boot && template.os.boot.devices['device'] && template.os.boot.devices.device[1] ? template.os.boot.devices.device[1].toUpperCase() : '',
+      soundCard: template['soundcard_enabled'] ? template['soundcard_enabled'] === 'true' : false,
+      virtualSCSI: template['virtio_scsi'] && template.virtio_scsi['enabled'] ? template.virtio_scsi['enabled'] === 'true' : false,
     }
   },
   clusterToInternal ({ cluster }) {
