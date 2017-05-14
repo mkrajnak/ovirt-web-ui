@@ -1,0 +1,11 @@
+{
+  "extends": ["standard", "standard-react"],
+  "parser": "babel-eslint",
+  "env": {
+    "mocha": true
+  },
+  "rules": {
+    "comma-dangle": [2, "always-multiline"],
+    "object-curly-spacing": [2, "always"]
+  }
+}
